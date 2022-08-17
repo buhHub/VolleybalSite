@@ -8,7 +8,28 @@
 <div class="container">
     <div class="one">
         <form method="POST" action="">
-            <p>hola</p>
+            <table style="width:100%;">
+                <thead>
+                    <tr>
+                        <th>Datum:</th>
+                        <th>Locatie:</th>
+                        <th>Start Tijd:</th>
+                        <th>Eind Tijd:</th>
+                        <th>Aantal/Maximum:</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in range(n_list) %}
+                    <tr>
+                        <td> {{ list[i][1] }} </td>
+                        <td> {{ list[i][4] }} </td>
+                        <td> {{ list[i][2] }} </td>
+                        <td> {{ list[i][3] }} </td>
+                        <td> {{ list[i][5] }} </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </form>
     </div>
 </div>

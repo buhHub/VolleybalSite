@@ -33,9 +33,9 @@ def matches():
     conn = sqlite3.connect('Volleyball.db')
     c = conn.cursor()
     match_list = c.execute("SELECT * FROM MATCHDAYS").fetchall()
-    print(match_list)
-    return render_template('matches.html')
-    #return render_template('matches.html', list=datas, n_list=len(datas))
+    #print(match_list)
+    #return render_template('matches.html')
+    return render_template('matches.html', list=match_list, n_list=len(match_list))
 
 # THIS CAN BE DELETED, ITS OVERWRITED BY THE RESULTS PAGE
 
@@ -66,4 +66,4 @@ def signup():
     return render_template('signup.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host = "0.0.0.0", debug=True)
