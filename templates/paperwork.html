@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<div class="jumbotron text-center">
+    <h1>Request iSell data</h1>
+</div>
+<form method="POST" action="">
+    <div class="form-group">
+        <p>ENTER ORDER IDs: </p>
+        <p style="display:inline"><input type="text" autocomplete="off" value="" oninput='myFunction("A")' id="A" name="A"> <p id="AA" style="display:inline"></p> </p>
+        <p style="display:inline"><input type="text" autocomplete="off" value="" oninput='myFunction("B")' id="B" name="B"> <p id="BB" style="display:inline"></p> </p>
+        <p style="display:inline"><input type="text" autocomplete="off" value="" oninput='myFunction("C")' id="C" name="C"> <p id="CC" style="display:inline"></p> </p>
+        <p style="display:inline"><input type="text" autocomplete="off" value="" oninput='myFunction("D")' id="D" name="D"> <p id="DD" style="display:inline"></p> </p>
+        <p style="display:inline"><input type="text" autocomplete="off" value="" oninput='myFunction("E")' id="E" name="E"> <p id="EE" style="display:inline"></p> </p>
+        <p style="display:inline"><input type="text" autocomplete="off" value="" oninput='myFunction("F")' id="F" name="F"> <p id="FF" style="display:inline"></p> </p>
+    </div>
+    <p><input type="submit" class="btn btn-primary" value="Submit"></p>
+</form>
+
+{% endblock %}
