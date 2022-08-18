@@ -15,7 +15,8 @@
                         <th>Locatie:</th>
                         <th>Start Tijd:</th>
                         <th>Eind Tijd:</th>
-                        <th>Aantal/Maximum:</th>
+                        <th>Aantal / Maximum:</th>
+                        <th>Open:</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -25,7 +26,9 @@
                         <td> {{ list[i][4] }} </td>
                         <td> {{ list[i][2] }} </td>
                         <td> {{ list[i][3] }} </td>
-                        <td> {{ list[i][5] }} </td>
+                        <td> {{ list[i][7] }} / {{ list[i][5] }} </td>
+                        <td> {% if list[i][6] %} Ja {% else %} Nee{% endif %}</td>
+                        <td> <button type="submit" name="DetailBtn" value="{{ list[i][1] }}"> Details</button></td>
                     </tr>
                     {% endfor %}
                 </tbody>

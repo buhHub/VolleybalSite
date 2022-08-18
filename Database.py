@@ -27,22 +27,29 @@ testdata = [(2, 0),
 ]
 c.executemany("INSERT INTO PARTICIPANT (participant_id, tentative) VALUES (?, ?)", [data for data in testdata if not (data[0] in participants)])
 
-c.execute("CREATE TABLE IF NOT EXISTS PLAYER ([id] INTEGER PRIMARY KEY,[firstname] text, [lastname] text, [participations] text)")
+c.execute("CREATE TABLE IF NOT EXISTS PLAYER ([id] INTEGER PRIMARY KEY,[firstname] text, [lastname] text, [date] text, [paid] BIT, [payment_id] text)")
 players = c.execute("SELECT firstname,lastname FROM PLAYER").fetchall()
-testdata = [("Buh", "Khuu", "20220713-20220718-20220721"),
-    ("Nick", "Chen", "20220713-20220718-20220721"),
-    ("Esli", "Wang", "20220718-20220721"),
-    ("Almar", "van Diessen", "20220713-20220721"),
-    ("Jason", "Liu", "20220713-20220718")
+testdata = [("Buh", "Khuu", "20220713", 1, "i4yro4ybbc9op"),
+    ("Buh", "Khuu", "20220718", 1, 'o982bc3982'),
+    ("Buh", "Khuu", "20220721", 0, 'NULL'),
+    ("Nick", "Chen", "20220713", 1, "948bvro93"),
+    ("Nick", "Chen", "20220718", 1, "lnbc8u3ol"),
+    ("Nick", "Chen", "20220721", 0, 'NULL'),
+    ("Jennifer", "Fung", "20220721", 0, 'NULL'),
+    ("Esli", "Wang", "20220718", 0, 'NULL'),
+    ("Almar", "van Diessen", "20220713", 0, 'NULL'),
+    ("Jason", "Liu", "20220713", 1, "23lb9cl829843"),
+    ("Jason", "Liu", "20220718", 1, "nc982o323c")
 ]
-c.executemany("INSERT INTO PLAYER (firstname, lastname, participations) VALUES (?, ?, ?)", [i for i in testdata if not i[0:2] in players])
+c.executemany("INSERT INTO PLAYER (firstname, lastname, date, paid, payment_id) VALUES (?, ?, ?, ?, ?)", testdata)
+#c.executemany("INSERT INTO PLAYER (firstname, lastname, participations) VALUES (?, ?, ?)", [i for i in testdata if not i[0:2] in players])
 
-c.execute("CREATE TABLE IF NOT EXISTS MATCHDAYS ([id] INTEGER PRIMARY KEY,[date] text, [starttime] text, [endtime] text, [location] text, [max] int, [participants] text)")
-testdata = [("20220713", "20:30", "23:00", "De Vaart", 50, "1-4-2"),
-    ("20220718", "20:30", "23:00", "De Kraal", 35, "1"),
-    ("20220721", "20:30", "23:00", "De Karekiet", 35, "2")
+c.execute("CREATE TABLE IF NOT EXISTS MATCHDAYS ([id] INTEGER PRIMARY KEY,[date] text, [starttime] text, [endtime] text, [location] text, [max] int, [open] BIT)")
+testdata = [("20220713", "20:30", "23:00", "De Vaart", 50, 0),
+    ("20220718", "20:30", "23:00", "De Kraal", 35, 0),
+    ("20220721", "20:30", "23:00", "De Karekiet", 35, 1)
 ]
-c.executemany("INSERT INTO MATCHDAYS (date, starttime, endtime, location, max, participants) VALUES (?, ?, ?, ?, ?, ?)", testdata)
+c.executemany("INSERT INTO MATCHDAYS (date, starttime, endtime, location, max, open) VALUES (?, ?, ?, ?, ?, ?)", testdata)
 
 conn.commit()
 

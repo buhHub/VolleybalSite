@@ -7,7 +7,6 @@ app = Flask(__name__)
 
 # REMOVE CACHING POSSIBILITIES [PDF WILL UPDATE AFTER REFRESH]
 
-
 @app.after_request
 def add_header(r):
     """
@@ -28,42 +27,63 @@ def index():
 
 # MATCHES
 
-@app.route('/matches')
+@app.route('/matches', methods=['GET', 'POST'])
 def matches():
+    if request.method == 'POST':
+        matchday = int(request.form.getlist('DetailBtn')[0])
+        return redirect(url_for('signup', matchday = matchday, message = ''))
+
     conn = sqlite3.connect('Volleyball.db')
     c = conn.cursor()
     match_list = c.execute("SELECT * FROM MATCHDAYS").fetchall()
+    player_list = c.execute("SELECT date FROM PLAYER").fetchall()
+
+    matchdays = {i[1]:0 for i in match_list}
+    for i in [j[0] for j in player_list]:
+        matchdays[i] = matchdays[i] + 1
+
+    match_list = [list(i) + [matchdays[(i[1])]] for i in match_list]
+
     #print(match_list)
     #return render_template('matches.html')
     return render_template('matches.html', list=match_list, n_list=len(match_list))
-
-# THIS CAN BE DELETED, ITS OVERWRITED BY THE RESULTS PAGE
-
-@app.route('/paperwork', methods=['GET', 'POST'])
-def paperwork():
-    if request.method == 'POST':
-
-        #        print("paperwork posted")
-        FormNames = ["A", "B", "C", "D", "E", "F"]
-        RefList = [request.form.get(
-            FormName) for FormName in FormNames if request.form.get(FormName)]
-
-        DataList = requestdata(RefList)
-        return redirect(url_for('results', data=[RefList], len_list=10, location="CZM"))
-
-    print("paperwork getted")
-    return render_template('paperwork.html')
 
 # VOLLEYBALL: SIGN UP PAGE
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    #if request.method == 'POST':
+    matchday = request.args['matchday']
+    message = request.args['message']
 
-     #   pass
-      #  return redirect(url_for('signup'))
+    if request.method == 'POST':
+        conn = sqlite3.connect('Volleyball.db')
+        c = conn.cursor()
 
-    return render_template('signup.html')
+        signupname = request.form["uname"]
+        signup_firstname, signup_lastname = request.form["uname"].split()[0], ''.join(request.form["uname"].split()[1:])
+        
+        check = [(' '.join(i[1:3]),i[-1]) for i in c.execute("SELECT * FROM PLAYER WHERE date="+str(matchday)).fetchall()]
+        if len(c.execute("SELECT * FROM PLAYER WHERE date="+str(matchday)).fetchall()) > 50:
+            return redirect(url_for('signup', matchday = matchday, message = "Limiet bereikt."))
+
+        for i in check:
+            if i[0] == signupname:
+                return redirect(url_for('signup', matchday = matchday, message = signupname + " staat al ingeschreven."))
+
+        data = [(signup_firstname, signup_lastname, matchday, 0)]
+        c.executemany("INSERT INTO PLAYER (firstname, lastname, date, paid) VALUES (?, ?, ?, ?)", data)
+        conn.commit()
+        
+        return redirect(url_for('signup', matchday = matchday, message = ''))
+
+    conn = sqlite3.connect('Volleyball.db')
+    c = conn.cursor()
+    match_list = c.execute("SELECT * FROM MATCHDAYS WHERE date="+str(matchday)).fetchall()[0]
+    player_data = c.execute("SELECT * FROM PLAYER WHERE date="+str(matchday)).fetchall()
+
+    player_attendance = [(' '.join(i[1:3]),i[4]) for i in player_data]
+
+    return render_template('signup.html', match_list = match_list, player_attendance = player_attendance, n_players = len(player_attendance), message = message)
 
 if __name__ == '__main__':
     app.run(host = "0.0.0.0", debug=True)

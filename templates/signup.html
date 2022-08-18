@@ -8,9 +8,41 @@
 <div class="container">
     <div class="one">
         <form method="POST" action="">
-            <p>Voornaam + Achternaam:</p>
-            <input type="text" placeholder="Voor en achternaam" name="uname" required>
-            <p>Meerdere aanmeldingen kunnen gedaan worden door gebruik te maken van een komma.</p>
+            <h1>{{match_list[1]}}</h1>
+            <p>{{match_list[2]}} - {{match_list[3]}}</p>
+            <p>{{match_list[4]}}</p>
+            <p>{{match_list[5]}}</p>
+
+
+            <table style="width:100%;">
+                <thead>
+                    <tr>
+                        <th>Ingeschreven:</th>
+                        <th>Betaald:</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in range(n_players) %}
+                    <tr>
+                        <td> {{player_attendance[i][0]}} </td>
+                        <td> {% if player_attendance[i][1] == 1 %} Yes! :) {% else %} Nope :( {% endif %} </td>
+                    </tr>
+                    {% endfor %}
+                    {% if match_list[6] == 1 %}
+                    <tr>
+                        <td>  <input type="text" autocomplete="off" placeholder="Voor en achternaam" name="uname" required></td>
+                        <td> </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+           
+
+            {% if message != ''%}
+            <p>
+                {{ message }}
+            </p>
+            {% endif %}
         </form>
     </div>
 </div>
