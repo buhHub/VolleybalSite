@@ -59,13 +59,20 @@ def add_header(r):
     r.headers['Cache-Control'] = 'public, max-age=0'
     return r
 
-@app.route('/webhook', methods=['POST'])
+@app.route('/webhook', methods=['GET', 'POST'])
 def webhook():
-    if request.method == 'POST':
-        print(request.json)
-        return 'succes', 200
-    else:
-        abort(400)
+    if "id" not in request.form:
+            abort(404, "Unknown payment id")
+
+    payment_id = request.form["id"]
+    
+    api_key = "test_k9tafBmqUy3ATSVUVywAjGqtAqhVR7"
+    mollie_client = Client()
+    mollie_client.set_api_key(api_key)
+    payment = mollie_client.payments.get(payment_id)
+
+    for key, value in payment.items():
+        print(f"{key}: ",value)
 
 # HOMEPAGE
 
@@ -82,7 +89,7 @@ def index():
             "amount": {"currency": "EUR", "value": "120.00"},
             "description": "My first API payment",
             "webhookUrl": f"http://143.177.144.137/webhook",
-            "redirectUrl": f"{PUBLIC_URL}",
+            "redirectUrl": f"http://143.177.144.137/matches",
             "metadata": {"my_webshop_id": str(my_webshop_id)},
             "method": "ideal"
         }
@@ -103,8 +110,6 @@ def matches():
         return redirect(url_for('signup', matchday = matchday, message = ''))
 
     match_list = getData("match")
-    print(match_list.values())
-    print(len(match_list))
 
     return render_template('matches.html', list=list(match_list.values()), n_list=len(match_list))
 
