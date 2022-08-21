@@ -24,16 +24,25 @@
                 <tbody>
                     {% for i in range(n_players) %}
                     <tr>
-                        <td> {{player_attendance[i][0]}} </td>
-                        <td> {% if player_attendance[i][1] == 1 %} Yes! :) {% else %} Nope :( {% endif %} </td>
+                        <td> {{participants_data[i][0]}} </td>
+                        <td> {% if participants_data[i][4] != 'NULL' %} Yes! :) {% else %} Nope :( {% endif %} </td>
                     </tr>
                     {% endfor %}
+
                     {% if match_list[6] == 1 %}
                     <tr>
-                        <td>  <input type="text" autocomplete="off" placeholder="Voor en achternaam" name="uname" required></td>
-                        <td> </td>
+                        <td>
+                            <datalist id="names" name= "names" method="POST" action="/">
+                                {% for name in names %}
+                                <option value= "{{name}}" SELECTED>{{name}}</option>"
+                                {% endfor %}
+                                <option disabled selected value> -- select a name -- </option>
+                            </datalist>
+                            <input name="uname" autoComplete="off" list="names" class="form-control"/> 
+                        </td>
+                        <td></td>
                     </tr>
-                    {% endif %}
+                    {% endif %}                    
                 </tbody>
             </table>
            

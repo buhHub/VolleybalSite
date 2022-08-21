@@ -5,23 +5,31 @@
 
 <div class="container-fluid">
     <div class="one">
+        <!-- 
+            0: Datum YYYYMMDD
+            1: Starttijd
+            2: Eindtijd
+            3: Locatie
+            4: Limiet
+            5: Open voor inschrijven
+         -->
         {% for i in range(n_list) %}
-        <form id="{{list[i][1]}}" method="POST" action="">
+        <form id="{{list[i][0]}}" method="POST" action="">
             <div class="matches">
-                <input type="hidden" name="dateBtn" value="{{list[i][1]}}" />
-                <div id="{{ list[i][1] }}" class="card" name="cardname" onclick="document.getElementById('{{list[i][1]}}').submit();">
+                <input type="hidden" name="dateBtn" value="{{list[i][0]}}" />
+                <div id="{{ list[i][0] }}" class="card" name="cardname" onclick="document.getElementById('{{list[i][0]}}').submit();">
                     <div class="header">
                         <div>
-                            <h2 class="title">{{ list[i][4] }}</h2>
-                            <p class="date">{{ list[i][1] }}</p>
+                            <h2 class="title">{{ list[i][3] }}</h2>
+                            <p class="date">{{ list[i][0] }}</p>
                         </div>
                         <div class="time">
+                            <h4 class="stamp">{{ list[i][1] }}</h4>
                             <h4 class="stamp">{{ list[i][2] }}</h4>
-                            <h4 class="stamp">{{ list[i][3] }}</h4>
                         </div>
                     </div>
                     <div class="participants">
-                        <p>{{ list[i][7] }} / {{ list[i][5] }}</p>
+                        <p>{{ list[i][6] }} / {{ list[i][4] }}</p>
                     </div>
                 </div>
             </div>

@@ -19,29 +19,33 @@ def create_connection(db_file):
 conn = sqlite3.connect('Volleyball.db')
 c = conn.cursor()
 
-c.execute("CREATE TABLE IF NOT EXISTS PARTICIPANT ([id] INTEGER PRIMARY KEY,[participant_id] int, [tentative] BIT)")
-participants = [i[0] for i in c.execute("SELECT participant_id FROM PARTICIPANT").fetchall()]
-testdata = [(2, 0),
-    (4, 0),
-    (1, 0)
+c.execute("CREATE TABLE IF NOT EXISTS DATA ([id] INTEGER PRIMARY KEY,[player_id] int, [match_id] int, [new_player] BIT, [tentative] BIT, [payment_id] text)")
+players = c.execute("SELECT player_id FROM DATA").fetchall()
+testdata = [(1, 1, 0, 0, "i4yro4ybbc9op"),
+    (1, 2, 0, 0, 'o982bc3982'),
+    (1, 3, 0, 0, 'NULL'),
+    (2, 1, 0, 0, "948bvro93"),
+    (2, 2, 0, 0, "lnbc8u3ol"),
+    (2, 3, 0, 0, 'NULL'),
+    (5, 3, 0, 0, 'NULL'),
+    (3, 2, 0, 0, 'NULL'),
+    (8, 1, 0, 1, 'NULL'),
+    (6, 1, 0, 0, "23lb9cl829843"),
+    (6, 2, 0, 0, "nc982o323c")
 ]
-c.executemany("INSERT INTO PARTICIPANT (participant_id, tentative) VALUES (?, ?)", [data for data in testdata if not (data[0] in participants)])
+c.executemany("INSERT INTO DATA (player_id, match_id, new_player, tentative, payment_id) VALUES (?, ?, ?, ?, ?)", testdata)
 
-c.execute("CREATE TABLE IF NOT EXISTS PLAYER ([id] INTEGER PRIMARY KEY,[firstname] text, [lastname] text, [date] text, [paid] BIT, [payment_id] text)")
-players = c.execute("SELECT firstname,lastname FROM PLAYER").fetchall()
-testdata = [("Buh", "Khuu", "20220713", 1, "i4yro4ybbc9op"),
-    ("Buh", "Khuu", "20220718", 1, 'o982bc3982'),
-    ("Buh", "Khuu", "20220721", 0, 'NULL'),
-    ("Nick", "Chen", "20220713", 1, "948bvro93"),
-    ("Nick", "Chen", "20220718", 1, "lnbc8u3ol"),
-    ("Nick", "Chen", "20220721", 0, 'NULL'),
-    ("Jennifer", "Fung", "20220721", 0, 'NULL'),
-    ("Esli", "Wang", "20220718", 0, 'NULL'),
-    ("Almar", "van Diessen", "20220713", 0, 'NULL'),
-    ("Jason", "Liu", "20220713", 1, "23lb9cl829843"),
-    ("Jason", "Liu", "20220718", 1, "nc982o323c")
+c.execute("CREATE TABLE IF NOT EXISTS PLAYER ([id] INTEGER PRIMARY KEY,[firstname] text, [lastname] text)")
+testdata = [("Buh", "Khuu"),
+    ("Nick", "Chen"),
+    ("Esli", "Wang"),
+    ("Calvin", "Fung"),
+    ("Jennifer", "Fung"),
+    ("Jason", "Liu"),
+    ("Melissa", "Fung"),
+    ("Almar", "van Diessen")
 ]
-c.executemany("INSERT INTO PLAYER (firstname, lastname, date, paid, payment_id) VALUES (?, ?, ?, ?, ?)", testdata)
+c.executemany("INSERT INTO PLAYER (firstname, lastname) VALUES (?, ?)", testdata)
 #c.executemany("INSERT INTO PLAYER (firstname, lastname, participations) VALUES (?, ?, ?)", [i for i in testdata if not i[0:2] in players])
 
 c.execute("CREATE TABLE IF NOT EXISTS MATCHDAYS ([id] INTEGER PRIMARY KEY,[date] text, [starttime] text, [endtime] text, [location] text, [max] int, [open] BIT)")
@@ -52,7 +56,3 @@ testdata = [("20220713", "20:30", "23:00", "De Vaart", 50, 0),
 c.executemany("INSERT INTO MATCHDAYS (date, starttime, endtime, location, max, open) VALUES (?, ?, ?, ?, ?, ?)", testdata)
 
 conn.commit()
-
-check = [i[0] for i in c.execute("SELECT participant_id FROM PARTICIPANT").fetchall()]
-sql="SELECT firstname, lastname FROM PLAYER WHERE ROWID IN ({seq})".format(seq=','.join(['?']*len(check)))
-print(c.execute(sql, check).fetchall())
