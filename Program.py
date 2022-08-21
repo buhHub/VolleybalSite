@@ -30,7 +30,7 @@ def index():
 @app.route('/matches', methods=['GET', 'POST'])
 def matches():
     if request.method == 'POST':
-        matchday = int(request.form.getlist('DetailBtn')[0])
+        matchday = int(request.form.get('dateBtn'))
         return redirect(url_for('signup', matchday = matchday, message = ''))
 
     conn = sqlite3.connect('Volleyball.db')
@@ -60,21 +60,29 @@ def signup():
         c = conn.cursor()
 
         signupname = request.form["uname"]
-        signup_firstname, signup_lastname = request.form["uname"].split()[0], ''.join(request.form["uname"].split()[1:])
+        signup_firstname, signup_lastname = request.form["uname"].split()[0], ' '.join(request.form["uname"].split()[1:])
         
+        # Capacity Check
         check = [(' '.join(i[1:3]),i[-1]) for i in c.execute("SELECT * FROM PLAYER WHERE date="+str(matchday)).fetchall()]
         if len(c.execute("SELECT * FROM PLAYER WHERE date="+str(matchday)).fetchall()) > 50:
             return redirect(url_for('signup', matchday = matchday, message = "Limiet bereikt."))
 
+        # Duplicate Check
         for i in check:
             if i[0] == signupname:
                 return redirect(url_for('signup', matchday = matchday, message = signupname + " staat al ingeschreven."))
 
-        data = [(signup_firstname, signup_lastname, matchday, 0)]
-        c.executemany("INSERT INTO PLAYER (firstname, lastname, date, paid) VALUES (?, ?, ?, ?)", data)
+        # Payment Check
+        player_history = c.execute(f"SELECT * FROM PLAYER WHERE firstname='{signup_firstname}' AND lastname='{signup_lastname}'").fetchall()
+        payment_history = [int(i[4]) for i in player_history]
+        if sum(payment_history) != len(payment_history):
+            return redirect(url_for('signup', matchday = matchday, message = "Vorige betalingen niet voldaan."))
+
+        data = [(signup_firstname, signup_lastname, matchday, 0, 'NULL')]
+        c.executemany("INSERT INTO PLAYER (firstname, lastname, date, paid, payment_id) VALUES (?, ?, ?, ?, ?)", data)
         conn.commit()
         
-        return redirect(url_for('signup', matchday = matchday, message = ''))
+        return redirect(url_for('signup', matchday = matchday, message = 'Je bent toegevoegd!'))
 
     conn = sqlite3.connect('Volleyball.db')
     c = conn.cursor()

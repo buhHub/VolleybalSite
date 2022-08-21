@@ -1,39 +1,32 @@
 {% extends 'layout.html' %}
 
 {% block body %}
+<link rel="stylesheet" href="../static/matches.css">
 
-<p></p>
-<p></p>
-
-<div class="container">
+<div class="container-fluid">
     <div class="one">
-        <form method="POST" action="">
-            <table style="width:100%;">
-                <thead>
-                    <tr>
-                        <th>Datum:</th>
-                        <th>Locatie:</th>
-                        <th>Start Tijd:</th>
-                        <th>Eind Tijd:</th>
-                        <th>Aantal / Maximum:</th>
-                        <th>Open:</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for i in range(n_list) %}
-                    <tr>
-                        <td> {{ list[i][1] }} </td>
-                        <td> {{ list[i][4] }} </td>
-                        <td> {{ list[i][2] }} </td>
-                        <td> {{ list[i][3] }} </td>
-                        <td> {{ list[i][7] }} / {{ list[i][5] }} </td>
-                        <td> {% if list[i][6] %} Ja {% else %} Nee{% endif %}</td>
-                        <td> <button type="submit" name="DetailBtn" value="{{ list[i][1] }}"> Details</button></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        {% for i in range(n_list) %}
+        <form id="{{list[i][1]}}" method="POST" action="">
+            <div class="matches">
+                <input type="hidden" name="dateBtn" value="{{list[i][1]}}" />
+                <div id="{{ list[i][1] }}" class="card" name="cardname" onclick="document.getElementById('{{list[i][1]}}').submit();">
+                    <div class="header">
+                        <div>
+                            <h2 class="title">{{ list[i][4] }}</h2>
+                            <p class="date">{{ list[i][1] }}</p>
+                        </div>
+                        <div class="time">
+                            <h4 class="stamp">{{ list[i][2] }}</h4>
+                            <h4 class="stamp">{{ list[i][3] }}</h4>
+                        </div>
+                    </div>
+                    <div class="participants">
+                        <p>{{ list[i][7] }} / {{ list[i][5] }}</p>
+                    </div>
+                </div>
+            </div>
         </form>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}
