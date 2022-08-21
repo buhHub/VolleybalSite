@@ -1,7 +1,15 @@
-from flask import Flask, flash, redirect, render_template, request, session, url_for, jsonify
+from flask import Flask, flash, redirect, render_template, request, session, url_for, jsonify, abort
 import sqlite3
 import os.path as path
 import datetime
+import requests
+
+import os
+import time
+
+from mollie.api.client import Client
+from mollie.api.error import Error
+import mollie
 
 app = Flask(__name__)
 
@@ -51,10 +59,39 @@ def add_header(r):
     r.headers['Cache-Control'] = 'public, max-age=0'
     return r
 
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    if request.method == 'POST':
+        print(request.json)
+        return 'succes', 200
+    else:
+        abort(400)
+
 # HOMEPAGE
 
 @app.route('/')
 def index():
+    api_key = "test_k9tafBmqUy3ATSVUVywAjGqtAqhVR7"
+    mollie_client = Client()
+    mollie_client.set_api_key(api_key)
+    PUBLIC_URL = "https://www.google.com"
+
+    my_webshop_id = int(time.time())
+    payment = mollie_client.payments.create(
+        {
+            "amount": {"currency": "EUR", "value": "120.00"},
+            "description": "My first API payment",
+            "webhookUrl": f"http://143.177.144.137/webhook",
+            "redirectUrl": f"{PUBLIC_URL}",
+            "metadata": {"my_webshop_id": str(my_webshop_id)},
+            "method": "ideal"
+        }
+    )
+
+    data = {"status": payment.status}
+    print(payment)
+
+    return redirect(payment.checkout_url)
     return render_template('home.html')
 
 # MATCHES
