@@ -43,6 +43,40 @@ def getData(mode="all"):
         print("Empty")
         return 0
     
+def create_payment(matchday, names, price):
+    api_key = "test_k9tafBmqUy3ATSVUVywAjGqtAqhVR7"
+    mollie_client = Client()
+    mollie_client.set_api_key(api_key)
+
+    my_webshop_id = int(time.time())
+    payment = mollie_client.payments.create(
+        {
+            "amount": {"currency": "EUR", "value": (price)},
+            "description": "My first API payment",
+            "webhookUrl": f"http://143.177.144.137/webhook",
+            "redirectUrl": f"http://143.177.144.137/payment?matchday={matchday}&message=",
+            "metadata": {"my_webshop_id": str(my_webshop_id)},
+            "method": "ideal"
+        }
+    )
+
+    data = {"status": payment.status}
+    print(payment)
+
+    conn = sqlite3.connect('Volleyball.db')
+    c = conn.cursor()
+
+    for name in names:
+        firstname, lastname = name.split(' ')[0], ' '.join(name.split(' ')[1:])
+        player_id = c.execute(f"SELECT id FROM PLAYER WHERE firstname='{firstname}' AND lastname='{lastname}'").fetchall()[0][0]
+        match_id = c.execute(f"SELECT id FROM MATCHDAYS WHERE date='{matchday}'").fetchall()[0][0]
+
+        print(player_id, match_id, payment.id)
+
+        c.execute(f"UPDATE DATA SET payment_id='{payment.id}' WHERE player_id='{player_id}' AND match_id='{match_id}'")
+    conn.commit()
+
+    return payment.checkout_url
 
 
 # REMOVE CACHING POSSIBILITIES [PDF WILL UPDATE AFTER REFRESH]
@@ -74,6 +108,8 @@ def webhook():
     for key, value in payment.items():
         print(f"{key}: ",value)
 
+    return 'succes', 200
+
 # HOMEPAGE
 
 @app.route('/')
@@ -81,7 +117,6 @@ def index():
     api_key = "test_k9tafBmqUy3ATSVUVywAjGqtAqhVR7"
     mollie_client = Client()
     mollie_client.set_api_key(api_key)
-    PUBLIC_URL = "https://www.google.com"
 
     my_webshop_id = int(time.time())
     payment = mollie_client.payments.create(
@@ -107,11 +142,56 @@ def index():
 def matches():
     if request.method == 'POST':
         matchday = int(request.form.get('dateBtn'))
-        return redirect(url_for('signup', matchday = matchday, message = ''))
+        open = [i for i in list(getData("match").values()) if i[0] == str(matchday)][0]
+        if not open[5]:
+            return redirect(url_for('payment', matchday = matchday, message = ''))
+        else:
+            return redirect(url_for('signup', matchday = matchday, message = ''))
 
     match_list = getData("match")
 
     return render_template('matches.html', list=list(match_list.values()), n_list=len(match_list))
+
+# VOLLEYBALL: PAYMENT PAGE
+
+@app.route('/payment', methods=['GET', 'POST'])
+def payment():
+    matchday = request.args['matchday']
+    message = request.args['message']
+    
+    conn = sqlite3.connect('Volleyball.db')
+    c = conn.cursor()
+
+    if request.method == 'POST':
+
+        not_paid = [j[0] for j in [i for i in list(getData().values()) if i[5] == 0 and i[1] == matchday]]
+        print(not_paid)
+
+        n_payments = sum([1 if request.form.get(name) else 0 for name in not_paid])
+        print(n_payments)
+
+        price = float([i for i in list(getData("match").values()) if i[0] == matchday][0][6])
+        print(price)
+
+        total_price = n_payments * price
+
+        checkout_url = create_payment(matchday, not_paid, "{:.2f}".format(total_price))
+        return redirect(checkout_url)
+                
+        return redirect(url_for('payment', matchday = matchday, message = 'Je bent toegevoegd!'))
+
+    match_list = c.execute("SELECT * FROM MATCHDAYS WHERE date="+str(matchday)).fetchall()[0]
+    participants_data = [i for i in list(getData().values()) if i[1]==matchday]
+    # player_data = c.execute("SELECT * FROM DATA WHERE match_id="+str(match_list[0])).fetchall()
+
+    participant_names = [i[0] for i in participants_data]
+    all_names = set(getData("player").values())
+
+    names = list(all_names.difference(set(participant_names)))
+    names.sort()
+
+    return render_template('payment.html', match_list = match_list, participants_data = participants_data, n_players = len(participants_data), message = message, names = names, n_names = len(names))
+
 
 # VOLLEYBALL: SIGN UP PAGE
 
