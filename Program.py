@@ -52,7 +52,7 @@ def create_payment(matchday, names, price):
     payment = mollie_client.payments.create(
         {
             "amount": {"currency": "EUR", "value": (price)},
-            "description": "My first API payment",
+            "description": f"Volleybal betaling {matchday}",
             "webhookUrl": f"http://143.177.144.137/webhook",
             "redirectUrl": f"http://143.177.144.137/payment?matchday={matchday}&message=",
             "metadata": {"my_webshop_id": str(my_webshop_id)},
@@ -108,32 +108,20 @@ def webhook():
     for key, value in payment.items():
         print(f"{key}: ",value)
 
+    if payment.status == 'paid':
+        conn = sqlite3.connect('Volleyball.db')
+        c = conn.cursor()
+
+        c.execute(f"UPDATE DATA SET paid=1 WHERE payment_id='{payment.id}'")
+        conn.commit()
+
+
     return 'succes', 200
 
 # HOMEPAGE
 
 @app.route('/')
 def index():
-    api_key = "test_k9tafBmqUy3ATSVUVywAjGqtAqhVR7"
-    mollie_client = Client()
-    mollie_client.set_api_key(api_key)
-
-    my_webshop_id = int(time.time())
-    payment = mollie_client.payments.create(
-        {
-            "amount": {"currency": "EUR", "value": "120.00"},
-            "description": "My first API payment",
-            "webhookUrl": f"http://143.177.144.137/webhook",
-            "redirectUrl": f"http://143.177.144.137/matches",
-            "metadata": {"my_webshop_id": str(my_webshop_id)},
-            "method": "ideal"
-        }
-    )
-
-    data = {"status": payment.status}
-    print(payment)
-
-    return redirect(payment.checkout_url)
     return render_template('home.html')
 
 # MATCHES
