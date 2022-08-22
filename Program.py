@@ -154,6 +154,8 @@ def payment():
         not_paid = [j[0] for j in [i for i in list(getData().values()) if i[5] == 0 and i[1] == matchday]]
         print(not_paid)
 
+        going2pay = list(set([name for name in not_paid if request.form.get(name) == 'on']))
+        print(going2pay)
         n_payments = sum([1 if request.form.get(name) else 0 for name in not_paid])
         print(n_payments)
 
@@ -165,7 +167,7 @@ def payment():
 
         total_price = n_payments * price
 
-        checkout_url = create_payment(matchday, not_paid, "{:.2f}".format(total_price))
+        checkout_url = create_payment(matchday, going2pay, "{:.2f}".format(total_price))
         return redirect(checkout_url)
                 
         
