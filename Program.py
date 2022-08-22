@@ -151,12 +151,14 @@ def payment():
     c = conn.cursor()
 
     if request.method == 'POST':
-
         not_paid = [j[0] for j in [i for i in list(getData().values()) if i[5] == 0 and i[1] == matchday]]
         print(not_paid)
 
         n_payments = sum([1 if request.form.get(name) else 0 for name in not_paid])
         print(n_payments)
+
+        if n_payments == 0:
+            return redirect(url_for('payment', matchday = matchday, message = 'Geen personen geselecteerd')) 
 
         price = float([i for i in list(getData("match").values()) if i[0] == matchday][0][6])
         print(price)
@@ -166,7 +168,7 @@ def payment():
         checkout_url = create_payment(matchday, not_paid, "{:.2f}".format(total_price))
         return redirect(checkout_url)
                 
-        return redirect(url_for('payment', matchday = matchday, message = 'Je bent toegevoegd!'))
+        
 
     match_list = c.execute("SELECT * FROM MATCHDAYS WHERE date="+str(matchday)).fetchall()[0]
     participants_data = [i for i in list(getData().values()) if i[1]==matchday]
@@ -179,7 +181,6 @@ def payment():
     names.sort()
 
     return render_template('payment.html', match_list = match_list, participants_data = participants_data, n_players = len(participants_data), message = message, names = names, n_names = len(names))
-
 
 # VOLLEYBALL: SIGN UP PAGE
 

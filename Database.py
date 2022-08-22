@@ -30,6 +30,14 @@ testdata = [(1, 1, 0, 0, "i4yro4ybbc9op", 1),
     (5, 3, 0, 0, 'NULL', 0),
     (3, 2, 0, 0, 'NULL', 0),
     (8, 1, 0, 1, 'NULL', 0),
+    (4, 2, 0, 0, 'NULL', 0),
+    (5, 1, 0, 1, 'NULL', 0),
+    (6, 2, 0, 0, 'NULL', 0),
+    (7, 1, 0, 1, 'NULL', 0),
+    (8, 2, 0, 0, 'NULL', 0),
+    (9, 1, 0, 1, 'NULL', 0),
+    (10, 2, 0, 0, 'NULL', 0),
+    (8, 1, 0, 1, 'NULL', 0),
     (6, 1, 0, 0, "23lb9cl829843", 1),
     (6, 2, 0, 0, "nc982o323c", 1)
 ]
@@ -43,6 +51,13 @@ testdata = [("Buh", "Khuu"),
     ("Jennifer", "Fung"),
     ("Jason", "Liu"),
     ("Melissa", "Fung"),
+    ("Steven", "Wan"),
+    ("Marvin", "Wan"),
+    ("Andy", "Yang"),
+    ("Janny", "Lam"),
+    ("Jesse", "Chim"),
+    ("Misaki", "Saraya"),
+    ("Saphira", "Chin"),
     ("Almar", "van Diessen")
 ]
 c.executemany("INSERT INTO PLAYER (firstname, lastname) VALUES (?, ?)", testdata)
