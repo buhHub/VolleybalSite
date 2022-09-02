@@ -18,20 +18,25 @@
             <table style="width:100%;">
                 <thead>
                     <tr>
+                        <th></th>
                         <th>Ingeschreven:</th>
-                        <th>Betaald:</th>
+                        <th>Nieuw</th>          
+                        <th>Onder Voorbehoud</th>            
                     </tr>
                 </thead>
                 <tbody>
                     {% for i in range(n_players) %}
                     <tr>
-                        <td> {{participants_data[i][0]}} </td>
-                        <td> {% if participants_data[i][4] != 'NULL' %} Yes! :) {% else %} Nope :( {% endif %} </td>
+                        <td>{{ i+1 }}</td>
+                        <td>{{participants_data[i][0]}}</td>
+                        <td>{{participants_data[i][2]}}</td>    
+                        <td>{{participants_data[i][3]}}</td>      
                     </tr>
                     {% endfor %}
 
                     {% if match_list[6] == "open" %}
                     <tr>
+                        <td></td>
                         <td>
                             <datalist id="names" name= "names" method="POST" action="/">
                                 {% for name in names %}
@@ -41,6 +46,18 @@
                             </datalist>
                             <input name="uname" autoComplete="off" list="names" class="form-control"/> 
                         </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>
+                            <label for="newby">Nieuw</label>
+                            <input type="checkbox" name="newby"> <br>
+                            <label for="tentative">Onder voorbehoud</label>
+                            <input type="checkbox" name="tentative">
+                        </td>
+                        <td></td>
                         <td></td>
                     </tr>
                     {% endif %}                    

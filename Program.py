@@ -126,7 +126,7 @@ def webhook():
 
 @app.route('/')
 def index():
-    print(request.environ)
+    print(request.environ.get("REMOTE_ADDR"))
     return render_template('home.html')
 
 # ADMIN ADD LOCATION
@@ -154,7 +154,7 @@ def admin():
         matchday = int(request.form.get('dateBtn'))
         return redirect(url_for('adminmatch', matchday = matchday, message = ''))
     match_list = getData("match")
-    return render_template('admin.html', list=list(match_list.values()), n_list=len(match_list))
+    return render_template('admin.html', list=list(match_list.values())[::-1], n_list=len(match_list))
     
 # ADMIN: MATCH MANAGEMENT
 
@@ -184,79 +184,84 @@ def adminmatch():
             conn.commit()
             return redirect(url_for('adminmatch', matchday = matchday, message = "Status en prijs geupdate"))
 
-        if "submit" in request.form:
-            if status == "open":
-                if len(request.form.get("uname")) == 0:
-                    participants = [j[0] for j in [i for i in list(getData().values()) if i[1] == matchday]]
-                    unsubscribers = list(set([name for name in participants if request.form.get(name) == 'on']))
-                    unsubscribers_ids = [key for key, value in getData("player").items() if value in unsubscribers]
-                    matchday_id = c.execute(f"SELECT id FROM MATCHDAYS WHERE date='{matchday}'").fetchall()[0][0]
-
-                    for n in unsubscribers_ids:
-                        c.execute(f"DELETE FROM DATA WHERE player_id='{n}' AND match_id='{matchday_id}'")
-
-                    conn.commit()
-
-                    new_message = f"Volgende spelers zijn verwijderd van de lijst: \n {' - '.join(unsubscribers)}"
-                    return redirect(url_for('adminmatch', matchday = matchday, message = new_message))
-                else:
-                    signupname = request.form["uname"]
-                    signup_firstname, signup_lastname = request.form["uname"].split()[0], ' '.join(request.form["uname"].split()[1:])
-                    
-                    # Capacity Check
-                    max_limit = [i for i in list(getData("match").values()) if i[0]==matchday][0][4]
-                    n_participants = len([i for i in list(getData().values()) if i[1] == matchday])
-                    if n_participants >= max_limit:
-                        return redirect(url_for('adminmatch', matchday = matchday, message = "Limiet bereikt."))
-
-                    # Duplicate Check
-                    participants = [i for i in list(getData().values()) if i[1] == matchday]
-                    for i in participants:
-                        if i[0] == signupname:
-                            return redirect(url_for('adminmatch', matchday = matchday, message = signupname + " staat al ingeschreven."))
-
-                    # Payment Check
-                    player_id = c.execute(f"SELECT id FROM PLAYER WHERE firstname='{signup_firstname}' AND lastname='{signup_lastname}'").fetchall()[0][0]
-                    print("---------------\n",player_id,"\n---------------\n")
-                    player_history = [i for i in list(getData().values()) if i[0] == signupname]
-                    print("---------------\n",player_history,"\n---------------\n")
-                    payment_history = [0 if i[4] == 'NULL' else 1 for i in player_history]
-                    print("---------------\n",payment_history,"\n---------------\n")
-
-                    if sum(payment_history) != len(payment_history):
-                        return redirect(url_for('adminmatch', matchday = matchday, message = "Vorige betalingen niet voldaan."))
-
-                    data = [(player_id, matchday_id,0,0, 'NULL', 0)]
-                    c.executemany("INSERT INTO DATA (player_id, match_id, new_player, tentative, payment_id, paid) VALUES (?, ?, ?, ?, ?, ?)", data)
-                    conn.commit()
-                    
-                    return redirect(url_for('adminmatch', matchday = matchday, message = 'Je bent toegevoegd!'))  
-            elif status == "ended": 
-                print(request.form)
+        if status == "open":
+            if len(request.form.get("uname")) == 0:
                 participants = [j[0] for j in [i for i in list(getData().values()) if i[1] == matchday]]
-                payers = list(set([name for name in participants if request.form.get(name) == 'on']))
-                payers_ids = [key for key, value in getData("player").items() if value in payers]
+                unsubscribers = list(set([name for name in participants if request.form.get(name) == 'on']))
+                unsubscribers_ids = [key for key, value in getData("player").items() if value in unsubscribers]
                 matchday_id = c.execute(f"SELECT id FROM MATCHDAYS WHERE date='{matchday}'").fetchall()[0][0]
 
-                print(participants, payers, payers_ids, matchday_id)
-
-                for n in payers_ids:
-                    if c.execute(f"SELECT paid FROM DATA WHERE player_id='{n}' AND match_id='{matchday_id}'").fetchall()[0][0] == 0:
-                        c.execute(f"UPDATE DATA SET payment_id='Manually modified', paid=1 WHERE player_id='{n}' and match_id='{matchday_id}'")
+                for n in unsubscribers_ids:
+                    c.execute(f"DELETE FROM DATA WHERE player_id='{n}' AND match_id='{matchday_id}'")
 
                 conn.commit()
 
-                if len(payers) == 0:
-                    return redirect(url_for('adminmatch', matchday = matchday, message = "Geen veranderingen"))
-
-                new_message = f"Volgende spelers zijn gemakeerd als betaald: \n {' - '.join(payers)}"
+                new_message = f"Volgende spelers zijn verwijderd van de lijst: \n {' - '.join(unsubscribers)}"
                 return redirect(url_for('adminmatch', matchday = matchday, message = new_message))
+            else:
+                print("Admin adding person")
+                signupname = request.form["uname"]
+                signup_firstname, signup_lastname = request.form["uname"].split()[0], ' '.join(request.form["uname"].split()[1:])
+                
+                # Capacity Check
+                max_limit = [i for i in list(getData("match").values()) if i[0]==matchday][0][4]
+                n_participants = len([i for i in list(getData().values()) if i[1] == matchday])
+                if n_participants >= max_limit:
+                    return redirect(url_for('adminmatch', matchday = matchday, message = "Limiet bereikt."))
+
+                # Duplicate Check
+                participants = [i for i in list(getData().values()) if i[1] == matchday]
+                for i in participants:
+                    if i[0] == signupname:
+                        return redirect(url_for('adminmatch', matchday = matchday, message = signupname + " staat al ingeschreven."))
+
+                # Payment Check
+                player_id = c.execute(f"SELECT id FROM PLAYER WHERE firstname='{signup_firstname}' AND lastname='{signup_lastname}'").fetchall()[0][0]
+                print("---------------\n",player_id,"\n---------------\n")
+                player_history = [i for i in list(getData().values()) if i[0] == signupname]
+                print("---------------\n",player_history,"\n---------------\n")
+                payment_history = [0 if i[4] == 'NULL' else 1 for i in player_history]
+                print("---------------\n",payment_history,"\n---------------\n")
+
+                if sum(payment_history) != len(payment_history):
+                    return redirect(url_for('adminmatch', matchday = matchday, message = "Vorige betalingen niet voldaan."))
+
+                data = [(player_id, matchday_id,0,0, 'NULL', 0)]
+                c.executemany("INSERT INTO DATA (player_id, match_id, new_player, tentative, payment_id, paid) VALUES (?, ?, ?, ?, ?, ?)", data)
+                conn.commit()
+                
+                return redirect(url_for('adminmatch', matchday = matchday, message = 'Je bent toegevoegd!'))  
+        elif status == "ended": 
+            print(request.form)
+            participants = [j[0] for j in [i for i in list(getData().values()) if i[1] == matchday]]
+            payers = list(set([name for name in participants if request.form.get(name) == 'on']))
+            payers_ids = [key for key, value in getData("player").items() if value in payers]
+            matchday_id = c.execute(f"SELECT id FROM MATCHDAYS WHERE date='{matchday}'").fetchall()[0][0]
+
+            print(participants, payers, payers_ids, matchday_id)
+
+            ip = request.environ.get("REMOTE_ADDR")
+            dt = datetime.datetime.now().strftime("%Y%m%d %H%M%S")
+            db_message = f"Manually modified on {ip} at {dt}"
+
+            for n in payers_ids:
+                if c.execute(f"SELECT paid FROM DATA WHERE player_id='{n}' AND match_id='{matchday_id}'").fetchall()[0][0] == 0:
+                    c.execute(f"UPDATE DATA SET payment_id='{db_message}', paid=1 WHERE player_id='{n}' and match_id='{matchday_id}'")
+
+            conn.commit()
+
+            if len(payers) == 0:
+                return redirect(url_for('adminmatch', matchday = matchday, message = "Geen veranderingen"))
+
+            new_message = f"Volgende spelers zijn gemakeerd als betaald: \n {' - '.join(payers)}"
+            return redirect(url_for('adminmatch', matchday = matchday, message = new_message))
 
     match_list = list(c.execute("SELECT * FROM MATCHDAYS WHERE date="+str(matchday)).fetchall()[0])
     match_list.append(c.execute(f"SELECT details FROM LOCATIONS WHERE name='{match_list[4]}'").fetchall()[0][0])
     participants_data = [i for i in list(getData().values()) if i[1]==matchday]
+    participants_data.sort(key=lambda row: (row[0]))
     # player_data = c.execute("SELECT * FROM DATA WHERE match_id="+str(match_list[0])).fetchall()
-
+    print(participants_data)
     participant_names = [i[0] for i in participants_data]
     all_names = set(getData("player").values())
 
@@ -304,7 +309,7 @@ def matches():
 
     match_list = getData("match")
 
-    return render_template('matches.html', list=list(match_list.values()), n_list=len(match_list))
+    return render_template('matches.html', list=list(match_list.values())[::-1], n_list=len(match_list))
 
 # VOLLEYBALL: PAYMENT PAGE
 
@@ -336,11 +341,11 @@ def payment():
         checkout_url = create_payment(matchday, going2pay, "{:.2f}".format(total_price))
         return redirect(checkout_url)
                 
-        
 
     match_list = list(c.execute("SELECT * FROM MATCHDAYS WHERE date="+str(matchday)).fetchall()[0])
     match_list.append(c.execute(f"SELECT details FROM LOCATIONS WHERE name='{match_list[4]}'").fetchall()[0][0])
     participants_data = [i for i in list(getData().values()) if i[1]==matchday]
+    participants_data.sort(key=lambda row: (row[0]))
     # player_data = c.execute("SELECT * FROM DATA WHERE match_id="+str(match_list[0])).fetchall()
 
     participant_names = [i[0] for i in participants_data]
@@ -364,8 +369,19 @@ def signup():
 
     if request.method == 'POST':
 
+        newby = 0
         signupname = request.form["uname"]
         signup_firstname, signup_lastname = request.form["uname"].split()[0], ' '.join(request.form["uname"].split()[1:])
+
+        # Existence Check
+        search_list = [(key, value) for key, value in getData("player").items() if value == signupname]
+        if len(search_list) == 0:
+            if request.form.get("newby") == "on":
+                c.execute("INSERT INTO PLAYER (firstname, lastname) VALUES (?, ?)", (signup_firstname, signup_lastname))
+                conn.commit()
+                newby = 1
+            else:
+                return redirect(url_for('signup', matchday = matchday, message = "Speler niet gevonden, geef aan dat diegene nieuw is."))
         
         # Capacity Check
         max_limit = [i for i in list(getData("match").values()) if i[0]==matchday][0][4]
@@ -390,7 +406,7 @@ def signup():
         if sum(payment_history) != len(payment_history):
             return redirect(url_for('signup', matchday = matchday, message = "Vorige betalingen niet voldaan."))
 
-        data = [(player_id, matchday_id,0,0, 'NULL', 0)]
+        data = [(player_id, matchday_id,newby,0, 'NULL', 0)]
         c.executemany("INSERT INTO DATA (player_id, match_id, new_player, tentative, payment_id, paid) VALUES (?, ?, ?, ?, ?, ?)", data)
         conn.commit()
         
@@ -399,11 +415,13 @@ def signup():
     match_list = list(c.execute("SELECT * FROM MATCHDAYS WHERE date="+str(matchday)).fetchall()[0])
     match_list.append(c.execute(f"SELECT details FROM LOCATIONS WHERE name='{match_list[4]}'").fetchall()[0][0])
     participants_data = [i for i in list(getData().values()) if i[1]==matchday]
+    print(participants_data)
+    participants_data.sort(key=lambda row: (row[0]))
     # player_data = c.execute("SELECT * FROM DATA WHERE match_id="+str(match_list[0])).fetchall()
 
     participant_names = [i[0] for i in participants_data]
-    all_names = set(getData("player").values())
 
+    all_names = set(getData("player").values())
     names = list(all_names.difference(set(participant_names)))
     names.sort()
 

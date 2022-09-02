@@ -13,6 +13,16 @@
             4: Limiet
             5: Open voor inschrijven
          -->
+        <a href="/admincreatematch">
+            <div class="matches">
+                <input type="hidden" name="actionBtn" value="create_event" />
+                <div id="add" class="card" name="cardname">
+                    <div class="participants">
+                        <h4>+</h4>
+                    </div>
+                </div>
+            </div>
+        </a>
         {% for i in range(n_list) %}
         <form id="{{list[i][0]}}" method="POST" action="">
             <div class="matches">
@@ -35,16 +45,6 @@
             </div>
         </form>
         {% endfor %}
-        <a href="/admincreatematch">
-            <div class="matches">
-                <input type="hidden" name="actionBtn" value="create_event" />
-                <div id="add" class="card" name="cardname">
-                    <div class="participants">
-                        <h4>+</h4>
-                    </div>
-                </div>
-            </div>
-        </a>
     </div>
 </div>
 {% endblock %}
