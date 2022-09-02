@@ -126,6 +126,7 @@ def webhook():
 
 @app.route('/')
 def index():
+    print(request.environ)
     return render_template('home.html')
 
 # ADMIN ADD LOCATION
