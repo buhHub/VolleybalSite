@@ -1,0 +1,20 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div>
+    <form id="locationdetails"  method="POST" action="">
+        <label for="title">Locatie naam:</label>
+        <input name="title" type="text" id="title" placeholder="De Kraal" required><br>    
+        <label for="address">Adres:</label>
+        <input name="address" type="text" id="address" placeholder="Zambezilaan 280" required><br>   
+        <label for="zipcode">Postcode:</label>
+        <input name="zipcode" type="text" id="zipcode" placeholder="1448RD" required><br>   
+        <label for="city">Stad:</label>
+        <input name="city" type="text" id="city" placeholder="Purmerend/Amsterdam" required><br>   
+        <label for="capacity">Aantal personen normaliter:</label>
+        <input name="capacity" type="number" id="capacity" placeholder="36" required><br>    
+        <input type="submit" value="Submit"></input>
+    </form>
+</div>
+
+{% endblock %}

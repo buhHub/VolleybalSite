@@ -20,6 +20,7 @@ def getData(mode="all"):
     match_list = {i[0]: list(i[1:]) for i in c.execute("SELECT * FROM MATCHDAYS").fetchall()}
     player_list = {i[0]:' '.join(i[1:]) for i in c.execute("SELECT * FROM PLAYER").fetchall()}
     data_list = {i[0]: list(i[1:]) for i in c.execute("SELECT * FROM DATA").fetchall()}
+    location_list = {i[0]: list(i[1:]) for i in c.execute("SELECT * FROM LOCATIONS").fetchall()}
 
     # Data_list manupalation:
     #   {i: [name, match, new, tent, p_id]}
@@ -37,6 +38,8 @@ def getData(mode="all"):
         return match_list
     elif mode == "player":
         return player_list
+    elif mode == "locations":
+        return location_list
     elif mode == "all":
         return data_list
     else:
@@ -73,6 +76,7 @@ def create_payment(matchday, names, price):
 
         print(player_id, match_id, payment.id)
 
+        #  ONLY DO THIS WHEN IT GENUINLY SAYS 0 AT PAID
         c.execute(f"UPDATE DATA SET payment_id='{payment.id}' WHERE player_id='{player_id}' AND match_id='{match_id}'")
     conn.commit()
 
@@ -124,6 +128,101 @@ def webhook():
 def index():
     return render_template('home.html')
 
+# ADMIN ADD LOCATION
+
+@app.route('/addlocation', methods=['GET', 'POST'])
+def addlocation():
+    if request.method == 'POST':
+
+        title, details, max = request.form["title"], request.form["address"] + ", " + request.form["zipcode"] + " " + request.form["city"], request.form["capacity"]
+        print(title, details, max)
+
+        conn = sqlite3.connect('Volleyball.db')
+        c = conn.cursor()
+        
+        c.executemany("INSERT INTO LOCATIONS (name, details, max) VALUES (?, ?, ?)", [(title, details, max)])
+        conn.commit()
+        return redirect(url_for('admincreatematch'))
+    return render_template('addlocation.html')
+
+# ADMIN
+
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+    if request.method == 'POST':
+        matchday = int(request.form.get('dateBtn'))
+        return redirect(url_for('adminmatch', matchday = matchday, message = ''))
+    match_list = getData("match")
+    return render_template('admin.html', list=list(match_list.values()), n_list=len(match_list))
+    
+# ADMIN: MATCH MANAGEMENT
+
+@app.route('/adminmatch', methods=['GET', 'POST'])
+def adminmatch():
+    matchday = request.args['matchday']
+    message = request.args['message']
+    
+    conn = sqlite3.connect('Volleyball.db')
+    c = conn.cursor()
+
+    if request.method == 'POST':
+        not_paid = [j[0] for j in [i for i in list(getData().values()) if i[5] == 0 and i[1] == matchday]]
+        print(not_paid)
+
+        going2pay = list(set([name for name in not_paid if request.form.get(name) == 'on']))
+        print(going2pay)
+        n_payments = sum([1 if request.form.get(name) else 0 for name in not_paid])
+        print(n_payments)
+
+        if n_payments == 0:
+            return redirect(url_for('payment', matchday = matchday, message = 'Geen personen geselecteerd')) 
+
+        price = float([i for i in list(getData("match").values()) if i[0] == matchday][0][6])
+        print(price)
+
+        total_price = n_payments * price
+
+        checkout_url = create_payment(matchday, going2pay, "{:.2f}".format(total_price))
+        return redirect(checkout_url)
+                
+        
+
+    match_list = c.execute("SELECT * FROM MATCHDAYS WHERE date="+str(matchday)).fetchall()[0]
+    participants_data = [i for i in list(getData().values()) if i[1]==matchday]
+    # player_data = c.execute("SELECT * FROM DATA WHERE match_id="+str(match_list[0])).fetchall()
+
+    participant_names = [i[0] for i in participants_data]
+    all_names = set(getData("player").values())
+
+    names = list(all_names.difference(set(participant_names)))
+    names.sort()
+
+    return render_template('adminmatch.html', match_list = match_list, participants_data = participants_data, n_players = len(participants_data), message = message, names = names, n_names = len(names))
+
+# CREATE MATCH ADMIN
+
+@app.route('/admincreatematch', methods=['GET', 'POST'])
+def admincreatematch():
+    location_list = (getData("locations"))
+    if request.method == 'POST':
+
+        date = ''.join(request.form.get('date').split('-'))
+        location = request.form.get('location')
+        capacity = request.form.get('capacity')
+        starttime = request.form.get('starttime')
+        endtime = request.form.get('endtime')
+        status = "open" if request.form.get('open') == 'on' else "opening later"
+        price = "0.00"
+        print(open)
+        
+        conn = sqlite3.connect('Volleyball.db')
+        c = conn.cursor()
+        
+        c.executemany("INSERT INTO MATCHDAYS (date, starttime, endtime, location, max, status, price) VALUES (?, ?, ?, ?, ?, ?, ?)", [(date, starttime, endtime, location, capacity, status, price)])
+        conn.commit()
+        return redirect(url_for('admin'))
+    return render_template('admincreatematch.html', list=list(location_list.values()), n_list=len(location_list))
+
 # MATCHES
 
 @app.route('/matches', methods=['GET', 'POST'])
@@ -131,7 +230,8 @@ def matches():
     if request.method == 'POST':
         matchday = int(request.form.get('dateBtn'))
         open = [i for i in list(getData("match").values()) if i[0] == str(matchday)][0]
-        if not open[5]:
+        print(open)
+        if open[5] == "ended":
             return redirect(url_for('payment', matchday = matchday, message = ''))
         else:
             return redirect(url_for('signup', matchday = matchday, message = ''))

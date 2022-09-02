@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script language="JavaScript">
+
+    var DivTxt = new Array()
+    {% for n in range(n_list) %}
+    var buffer = new Array()
+    buffer[0] = "{{list[n][0]}}"
+    buffer[1] = "{{list[n][1]}}"
+    buffer[2] = "{{list[n][2]}}"
+    DivTxt['{{n}}'] = buffer
+    {% endfor %}
+    
+    function getText(slction){
+        txtSelected = slction.selectedIndex;
+        document.getElementById('textDiv').innerHTML = DivTxt[txtSelected][1];
+        document.getElementById('capacity').value = DivTxt[txtSelected][2];
+    }
+    </script>
+
+<form id="matchdetails"  method="POST" action="">
+    <label for="location">Locatie:</label>
+    <select name="location" id="location" onchange = "getText(this)">
+        {% for data in list %}
+        <option value="{{data[0]}}">{{data[0]}}</option>
+        {% endfor %}
+    </select>
+    <a href="/addlocation">[Nieuwe locatie toevoegen]</a>
+    <div id="textDiv"> {{list[0][1]}}</div>
+    <label for="capacity">Aantal personen:</label>
+    <input name="capacity" type="number" id="capacity" value="36" required><br>    
+    <input name="date" type="date" id="date" required>
+    <input name="starttime" type="time" id="starttime" value="20:00" required>
+    <input name="endtime" type="time" id="endtime" value="23:30" required><br>  
+    <label for="open">Openstellen voor inschrijvingen:</label>
+    <input name="open" type="checkbox" id="open"><br>   
+    <input type="submit" name="submit_button">
+</form>
+
+{% endblock %}
