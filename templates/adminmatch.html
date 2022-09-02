@@ -1,31 +1,62 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-
-<p></p>
-<p></p>
+<script language="JavaScript">
+    
+    function statusChange(slction){
+        document.getElementById('save').value = slction.value;
+    }
+    </script>
 
 <div class="container">
     <div class="one">
-        <form method="POST" action="">
+        <form id="form" method="POST" action="">
             <h1>{{match_list[1]}}</h1>
             <p>{{match_list[2]}} - {{match_list[3]}}</p>
             <p>{{match_list[4]}}</p>
-            <p>{{match_list[5]}}</p>
+            <p>{{match_list[8]}}</p>
 
+            <label for="status">Status:</label>
+
+            <select name="status" id="status" onchange="statusChange(this)">
+              <option value="open" {% if match_list[6] == "open" %} selected="selected" {% endif %}>Open voor inschrijvingen</option>
+              <option value="ended" {% if match_list[6] == "ended" %} selected="selected" {% endif %}>Afgelopen en open voor betalingen</option>
+              <option value="closed" {% if match_list[6] == "closed" %} selected="selected" {% endif %}>Gesloten voor inschrijvingen en betalingen</option>
+            </select>
+
+
+            <p>Maximum aantal mensen: {{match_list[5]}}</p>
+            <p>
+                <label for="price">Prijs:</label>
+                <input name="price" type="number" id="price" step="0.10" value="{{match_list[7]}}" ><br>    </p>
+            
+
+            <button name="save" id="save" type="submit" value="{{match_list[6]}}">Opslaan</button>
 
             <table style="width:100%;">
                 <thead>
                     <tr>
                         <th>Ingeschreven:</th>
-                        <th>Betaald:</th>
+                        {% if match_list[6] == "ended" %}
+                            <th>Betaald:</th>
+                        {% endif %}
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for i in range(n_players) %}
                     <tr>
                         <td> {{participants_data[i][0]}} </td>
-                        <td> {% if participants_data[i][4] != 'NULL' %} Yes! :) {% else %} Nope :( {% endif %} </td>
+                        {% if match_list[6] == "ended" %}
+                            <td> {% if participants_data[i][5] == 1 %} Yes! :) {% else %} Nope :( {% endif %} </td>
+                            {% if participants_data[i][5] == 0 %}
+                                <td><input type="checkbox" name="{{ participants_data[i][0] }}"></td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}  
+                        {% else %}
+                            <td><input type="checkbox" name="{{ participants_data[i][0] }}"></td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
 
@@ -34,15 +65,22 @@
                         <td>
                             <datalist id="names" name= "names" method="POST" action="/">
                                 {% for name in names %}
-                                <option value= "{{name}}" SELECTED>{{name}}</option>"
+                                    <option value= "{{name}}" SELECTED>{{name}}</option>"
                                 {% endfor %}
                                 <option disabled selected value> -- select a name -- </option>
                             </datalist>
-                            <input name="uname" autoComplete="off" list="names" class="form-control"/> 
+                            <input name="uname" autoComplete="off" list="names" class="form-control" autofocus/> 
                         </td>
+                        <td><input type="submit" name="submit" value="Uitschrijven" method="POST" action="/"> </td>
+                    </tr>  
+                    {% elif match_list[6] == "ended" %}
+
+                    <tr>
                         <td></td>
-                    </tr>
-                    {% endif %}                    
+                        <td></td>
+                        <td><input type="submit" name="submit" value="Veranderingen opslaan" method="POST" action="/"> </td>
+                    </tr>      
+                    {% endif %}              
                 </tbody>
             </table>
            
