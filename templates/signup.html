@@ -20,8 +20,8 @@
                     <tr>
                         <th></th>
                         <th>Ingeschreven:</th>
-                        <th>Nieuw</th>          
-                        <th>Onder Voorbehoud</th>            
+                        <th></th>          
+                        <th></th>            
                     </tr>
                 </thead>
                 <tbody>
@@ -29,8 +29,8 @@
                     <tr>
                         <td>{{ i+1 }}</td>
                         <td>{{participants_data[i][0]}}</td>
-                        <td>{{participants_data[i][2]}}</td>    
-                        <td>{{participants_data[i][3]}}</td>      
+                        <td>{% if participants_data[i][2] == 1 %} Nieuw {% endif %}</td>    
+                        <td>{% if participants_data[i][3] == 1 %} Onder voorbehoud {% endif %}</td>      
                     </tr>
                     {% endfor %}
 
