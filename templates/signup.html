@@ -7,70 +7,147 @@
 
 <div class="container">
     <div class="one">
-        <form method="POST" action="">
-            <h1>{{match_list[1]}}</h1>
-            <p>{{match_list[2]}} - {{match_list[3]}}</p>
-            <p>{{match_list[4]}}</p>
-            <p>{{match_list[8]}}</p>
-            <p>Maximum aantal mensen: {{match_list[5]}}</p>
+        <h1>{{match_list[1]}}</h1>
+        <p>{{match_list[2]}} - {{match_list[3]}}</p>
+        <p>{{match_list[4]}}</p>
+        <p>{{match_list[8]}}</p>
+        <p>Maximum aantal mensen: {{match_list[5]}}</p>
 
 
-            <table style="width:100%;">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>Ingeschreven:</th>
-                        <th></th>          
-                        <th></th>            
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for i in range(n_players) %}
-                    <tr>
-                        <td>{{ i+1 }}</td>
-                        <td>{{participants_data[i][0]}}</td>
-                        <td>{% if participants_data[i][2] == 1 %} Nieuw {% endif %}</td>    
-                        <td>{% if participants_data[i][3] == 1 %} Onder voorbehoud {% endif %}</td>      
-                    </tr>
-                    {% endfor %}
+        <table style="width:100%;">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Ingeschreven:</th>
+                    <th></th>          
+                    <th></th>            
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in range(n_players) %}
+                <tr>
+                    <td>{{ i+1 }}</td>
+                    <td>{{participants_data[i][0]}}</td>
+                    <td>{% if participants_data[i][2] == 1 %} Nieuw {% endif %}</td>    
+                    <td>{% if participants_data[i][3] == 1 %} Onder voorbehoud {% endif %}</td>      
+                </tr>
+                {% endfor %}
 
-                    {% if match_list[6] == "open" %}
-                    <tr>
-                        <td></td>
-                        <td>
-                            <datalist id="names" name= "names" method="POST" action="/">
+                {% if match_list[6] == "open" %}
+                <tr>
+                    <td></td>
+                    <td>
+                        <p id="pNew"></p>
+                        <form id="form" method="POST" action="">
+                            <datalist id="names" name= "names">
                                 {% for name in names %}
                                 <option value= "{{name}}" SELECTED>{{name}}</option>"
                                 {% endfor %}
                                 <option disabled selected value> -- select a name -- </option>
                             </datalist>
-                            <input name="uname" autoComplete="off" list="names" class="form-control"/> 
-                        </td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td>
-                            <label for="newby">Nieuw</label>
-                            <input type="checkbox" name="newby"> <br>
-                            <label for="tentative">Onder voorbehoud</label>
-                            <input type="checkbox" name="tentative">
-                        </td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    {% endif %}                    
-                </tbody>
-            </table>
-           
+                            <input id="uname" autoComplete="off" list="names" class="form-control"/> 
+                        </form>
+                        <form id="form2" method="POST" action="">
+                            <button class="btn btn-success">Submit</button>
+                        </form>
+                    </td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <label for="newby">Nieuw</label>
+                        <input id="new" type="checkbox" name="newby"> <br>
+                        <label for="tentative">Onder voorbehoud</label>
+                        <input id="tentative" type="checkbox" name="tentative">
+                    </td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                {% endif %}                    
+            </tbody>
+        </table>
+        
 
-            {% if message != ''%}
-            <p>
-                {{ message }}
-            </p>
-            {% endif %}
-        </form>
+        {% if message != ''%}
+        <p>
+            {{ message }}
+        </p>
+        {% endif %}
     </div>
 </div>
+<script>
+    var names = {{names|tojson}};
+    var newParticipants = [];
+
+    var form = document.getElementById("form");
+    form.addEventListener("submit", addParticipant, true);
+
+    function Participant(name,newbie,tentative) {
+        this.name = name;
+        this.newbie = newbie;
+        this.tentative = tentative;
+    }
+
+    Participant.prototype.toString = function participantToString() {
+        return `<br>${this.name} (new = ${this.newbie}, tentative = ${this.tentative}) `;
+    };
+
+    function addParticipant(event)
+    {
+        console.log(event);
+        event.preventDefault();
+        var name = document.getElementById("uname").value;
+        var newbie = document.getElementById("new").checked;
+        var tentative = document.getElementById("tentative").checked;
+        if (!newbie && !names.includes(name))
+        {
+            alertify.error('Error message');
+            return;
+        }
+        newParticipants.push(new Participant(name, newbie, tentative));
+        document.getElementById("uname").value = ""
+        if (!newbie)
+        {
+            var index = names.indexOf(name);
+            console.log(index);
+            if (names !== -1) names.splice(index, 1); 
+            var nameList = document.getElementById("names");
+            
+            for (var i=0; i<nameList.children.length; i++) {
+                if (nameList.options[i].value == name) nameList.children[i].remove();
+            }
+        }
+        console.log(newParticipants);
+        document.getElementById("pNew").innerHTML = newParticipants.toString();
+    }
+
+    var form2 = document.getElementById("form2");
+    form2.addEventListener("submit", submitForm, true);
+
+    function submitForm(event)
+    {
+        event.preventDefault();
+        alertify.confirm("This is a confirm dialog.",
+        function(){
+            var hiddenInput = document.createElement('input')
+
+            hiddenInput.type = 'hidden'
+            hiddenInput.name = 'uname'
+            hiddenInput.value = newParticipants
+
+            form2.appendChild(hiddenInput)
+            document.getElementById("form2").submit();
+        },
+        function(){
+        });
+    }
+</script>
+
+<!-- JavaScript -->
+<script src="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
+
+<!-- CSS -->
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css"/>
 {% endblock %}
