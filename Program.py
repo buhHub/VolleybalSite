@@ -2,8 +2,9 @@ from flask import Flask, flash, redirect, render_template, request, session, url
 import sqlite3
 import os.path as path
 import datetime
-import requests
+import random
 import Functions
+import json
 
 import os
 import time
@@ -134,31 +135,23 @@ def adminmatch():
                 print("Admin adding person")
                 signupname = request.form["uname"]
                 signup_firstname, signup_lastname = request.form["uname"].split()[0], ' '.join(request.form["uname"].split()[1:])
-                
-                # Capacity Check
-                max_limit = [i for i in list(Functions.getData("match").values()) if i[0]==matchday][0][4]
-                n_participants = len([i for i in list(Functions.getData().values()) if i[1] == matchday])
-                if n_participants >= max_limit:
+                newbie = 0
+
+                status = Functions.signupcheck(matchday, signupname)
+
+                if status == "unknown_p":
+                    newbie = 1
+                    pass
+                elif status == "full":
                     return redirect(url_for('adminmatch', matchday = matchday, message = "Limiet bereikt."))
-
-                # Duplicate Check
-                participants = [i for i in list(Functions.getData().values()) if i[1] == matchday]
-                for i in participants:
-                    if i[0] == signupname:
-                        return redirect(url_for('adminmatch', matchday = matchday, message = signupname + " staat al ingeschreven."))
-
-                # Payment Check
-                player_id = c.execute(f"SELECT id FROM PLAYER WHERE firstname='{signup_firstname}' AND lastname='{signup_lastname}'").fetchall()[0][0]
-                print("---------------\n",player_id,"\n---------------\n")
-                player_history = [i for i in list(Functions.getData().values()) if i[0] == signupname]
-                print("---------------\n",player_history,"\n---------------\n")
-                payment_history = [0 if i[4] == 'NULL' else 1 for i in player_history]
-                print("---------------\n",payment_history,"\n---------------\n")
-
-                if sum(payment_history) != len(payment_history):
+                elif status == "duplicate":
+                    return redirect(url_for('adminmatch', matchday = matchday, message = signupname + " staat al ingeschreven."))
+                elif status == "not_paid":
                     return redirect(url_for('adminmatch', matchday = matchday, message = "Vorige betalingen niet voldaan."))
-
-                data = [(player_id, matchday_id,0,0, 'NULL', 0)]
+                elif status == "allowed":
+                    pass
+                player_id = list(Functions.get_id("player",signupname).keys())[0]
+                data = [(player_id, matchday_id,newbie,0, 'NULL', 0)]
                 c.executemany("INSERT INTO DATA (player_id, match_id, new_player, tentative, payment_id, paid) VALUES (?, ?, ?, ?, ?, ?)", data)
                 conn.commit()
                 
@@ -198,20 +191,20 @@ def adminmatch():
 def admincreatematch():
     location_list = (Functions.getData("location"))
     if request.method == 'POST':
-
+        password = random.randint(1000,9999)
         date = ''.join(request.form.get('date').split('-'))
         location = request.form.get('location')
         capacity = request.form.get('capacity')
         starttime = request.form.get('starttime')
         endtime = request.form.get('endtime')
-        status = "open" if request.form.get('open') == 'on' else "opening later"
+        status = "open" if request.form.get('open') == 'on' else "closed"
         price = "0.00"
-        print(open)
+        note = request.form.get('note')
         
         conn = sqlite3.connect('Volleyball.db')
         c = conn.cursor()
         
-        c.executemany("INSERT INTO MATCHDAYS (date, starttime, endtime, location, max, status, price) VALUES (?, ?, ?, ?, ?, ?, ?)", [(date, starttime, endtime, location, capacity, status, price)])
+        c.executemany("INSERT INTO MATCHDAYS (date, starttime, endtime, location, max, status, price, password, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [(date, starttime, endtime, location, capacity, status, price, password, note)])
         conn.commit()
         return redirect(url_for('admin'))
     return render_template('admincreatematch.html', list=list(location_list.values()), n_list=len(location_list))
@@ -237,6 +230,9 @@ def matches():
 
 @app.route('/payment', methods=['GET', 'POST'])
 def payment():
+    for key, value in request.environ.items():
+        print(f"{key}\t\t {value}")
+    print(request.environ.get("HTTP_REFERER"))
     matchday = request.args['matchday']
     message = request.args['message']
     
@@ -279,45 +275,64 @@ def signup():
     c = conn.cursor()
 
     if request.method == 'POST':
+        matchday_password = [value[-3] for key, value in Functions.getData("match").items() if value[0] == matchday][0]
+        print(matchday_password)
+
+        if matchday_password != request.form.get("password"):
+            match_list, participants_data, names = Functions.match_webdeatils(matchday)
+            message = "Wachtwoord komt niet overeen."
+            return render_template('signup.html', match_list = match_list, participants_data = participants_data, n_players = len(participants_data), message = message, names = names, n_names = len(names))
         
-        newby = 0
-        signupname = request.form["uname"]
-        signup_firstname, signup_lastname = signupname.split()[0], ' '.join(signupname.split()[1:])
+        message = ""
 
-        status = Functions.signupcheck(matchday, signupname)
+        for newParticipant in json.loads(request.form.get("uname")):
 
-        # NEW PERSON
-        if status == "unknown_p":
-            if request.form.get("newby") == "on":
-                c.execute("INSERT INTO PLAYER (firstname, lastname) VALUES (?, ?)", (signup_firstname, signup_lastname))
+            tentative = 1 if newParticipant["tentative"] == True else 0
+            newbie = 1 if newParticipant["newbie"] == True else 0
+            signupname = newParticipant["name"]
+            signup_firstname, signup_lastname = signupname.split()[0], ' '.join(signupname.split()[1:])
+
+            status = Functions.signupcheck(matchday, signupname)
+
+            # NEW PERSON
+            if status == "unknown_p":
+                if newbie:
+                    c.execute("INSERT INTO PLAYER (firstname, lastname) VALUES (?, ?)", (signup_firstname, signup_lastname))
+                    conn.commit()
+                    message += f"{signupname} toegevoegd aan db. "
+
+                    player_id = list(Functions.get_id("player",signupname).keys())[0]
+
+                    data = [(player_id, matchday_id,newbie,tentative, 'NULL', 0)]
+                    c.executemany("INSERT INTO DATA (player_id, match_id, new_player, tentative, payment_id, paid) VALUES (?, ?, ?, ?, ?, ?)", data)
+                    conn.commit()
+                else:
+                    message += f"{signupname} niet toegevoegd, geef aan dat {signupname} nieuw is. "
+            
+            # MATCH LIMIT REACHED
+            elif status == "full":
+                message += f"{signupname} niet toegevoegd, limiet bereikt. "
+
+            # PERSON ALREADY SIGNED UP
+            elif status == "duplicate":
+                message += f"{signupname} is al toegevoegd. "
+
+            # PERSON DID NOT PAY
+            elif status == "not_paid":
+                message += f"{signupname} heeft nog niet betaald. "
+
+            #SUCCESS
+            elif status == "allowed":
+                message += f"{signupname} toegevoegd! "
+                
+            
+                player_id = list(Functions.get_id("player",signupname).keys())[0]
+
+                data = [(player_id, matchday_id,0,tentative, 'NULL', 0)]
+                c.executemany("INSERT INTO DATA (player_id, match_id, new_player, tentative, payment_id, paid) VALUES (?, ?, ?, ?, ?, ?)", data)
                 conn.commit()
-                newby = 1
-            else:
-                return redirect(url_for('signup', matchday = matchday, message = "Speler niet gevonden, geef aan dat diegene nieuw is."))
         
-        # MATCH LIMIT REACHED
-        elif status == "full":
-            return redirect(url_for('signup', matchday = matchday, message = "Limiet bereikt."))
-
-        # PERSON ALREADY SIGNED UP
-        elif status == "duplicate":
-            return redirect(url_for('signup', matchday = matchday, message = signupname + " staat al ingeschreven."))
-
-        # PERSON DID NOT PAY
-        elif status == "not_paid":
-            return redirect(url_for('signup', matchday = matchday, message = "Vorige betalingen niet voldaan."))
-
-        #SUCCESS
-        elif status == "allowed":
-            pass
-        
-        player_id = list(Functions.get_id("player",signupname).keys())[0]
-
-        data = [(player_id, matchday_id,newby,0, 'NULL', 0)]
-        c.executemany("INSERT INTO DATA (player_id, match_id, new_player, tentative, payment_id, paid) VALUES (?, ?, ?, ?, ?, ?)", data)
-        conn.commit()
-        
-        return redirect(url_for('signup', matchday = matchday, message = 'Je bent toegevoegd!'))
+        return redirect(url_for('signup', matchday = matchday, message = message))
 
     match_list, participants_data, names = Functions.match_webdeatils(matchday)
 

@@ -63,12 +63,12 @@ testdata = [("Buh", "Khuu"),
 c.executemany("INSERT INTO PLAYER (firstname, lastname) VALUES (?, ?)", testdata)
 #c.executemany("INSERT INTO PLAYER (firstname, lastname, participations) VALUES (?, ?, ?)", [i for i in testdata if not i[0:2] in players])
 
-c.execute("CREATE TABLE IF NOT EXISTS MATCHDAYS ([id] INTEGER PRIMARY KEY,[date] text, [starttime] text, [endtime] text, [location] text, [max] int, [status] text, [price] text)")
-testdata = [("20220713", "20:30", "23:00", "De Vaart", 50, "ended", "4.50"),
-    ("20220718", "20:30", "23:00", "De Kraal", 35, "ended", "3.50"),
-    ("20220721", "20:30", "23:00", "De Karekiet", 35, "open", "0.00")
+c.execute("CREATE TABLE IF NOT EXISTS MATCHDAYS ([id] INTEGER PRIMARY KEY,[date] text, [starttime] text, [endtime] text, [location] text, [max] int, [status] text, [price] text, [password] text, [note] text)")
+testdata = [("20220713", "20:30", "23:00", "De Vaart", 50, "ended", "4.50", "5462",""),
+    ("20220718", "20:30", "23:00", "De Kraal", 35, "ended", "3.50", "8421",""),
+    ("20220721", "20:30", "23:00", "De Karekiet", 35, "open", "0.00", "1247","")
 ]
-c.executemany("INSERT INTO MATCHDAYS (date, starttime, endtime, location, max, status, price) VALUES (?, ?, ?, ?, ?, ?, ?)", testdata)
+c.executemany("INSERT INTO MATCHDAYS (date, starttime, endtime, location, max, status, price, password, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", testdata)
 
 c.execute("CREATE TABLE IF NOT EXISTS LOCATIONS ([id] INTEGER PRIMARY KEY,[name] text, [details] text, [max] int)")
 testdata = [("De Vaart", "Koggenland 88, 1447CN Purmerend", 60),

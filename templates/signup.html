@@ -10,7 +10,8 @@
         <h1>{{match_list[1]}}</h1>
         <p>{{match_list[2]}} - {{match_list[3]}}</p>
         <p>{{match_list[4]}}</p>
-        <p>{{match_list[8]}}</p>
+        <p>{{match_list[10]}}</p>
+        <p>{{match_list[9]}}</p>
         <p>Maximum aantal mensen: {{match_list[5]}}</p>
 
 
@@ -48,6 +49,7 @@
                             <input id="uname" autoComplete="off" list="names" class="form-control"/> 
                         </form>
                         <form id="form2" method="POST" action="">
+                            <input type="password" name="password" placeholder="Wachtwoord">
                             <button class="btn btn-success">Submit</button>
                         </form>
                     </td>
@@ -135,7 +137,7 @@
 
             hiddenInput.type = 'hidden'
             hiddenInput.name = 'uname'
-            hiddenInput.value = newParticipants
+            hiddenInput.value = JSON.stringify(newParticipants)
 
             form2.appendChild(hiddenInput)
             document.getElementById("form2").submit();
