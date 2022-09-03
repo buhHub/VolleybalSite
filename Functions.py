@@ -40,6 +40,7 @@ def getData(mode="all"):
         return 0
 
 def create_payment(matchday, names, price):
+
     api_key = "test_k9tafBmqUy3ATSVUVywAjGqtAqhVR7"
     mollie_client = Client()
     mollie_client.set_api_key(api_key)

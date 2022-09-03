@@ -230,9 +230,6 @@ def matches():
 
 @app.route('/payment', methods=['GET', 'POST'])
 def payment():
-    for key, value in request.environ.items():
-        print(f"{key}\t\t {value}")
-    print(request.environ.get("HTTP_REFERER"))
     matchday = request.args['matchday']
     message = request.args['message']
     
