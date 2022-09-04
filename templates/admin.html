@@ -13,21 +13,23 @@
             4: Limiet
             5: Open voor inschrijven
          -->
-        <a href="/admincreatematch">
-            <div class="matches">
+        <p>{{message}}</p>
+        <div class="matches">
+            <a href="/admincreatematch">
                 <input type="hidden" name="actionBtn" value="create_event" />
-                <div id="add" class="card" name="cardname">
+                <div id="add" class="card-addevent" name="cardname">
                     <div class="participants">
-                        <h4>+ Nieuw event toevoegen +</h4>
+                    <h4>+ Nieuw event toevoegen +</h4>
                     </div>
                 </div>
-            </div>
-        </a>
+            </a>
+        </div>
         {% for i in range(n_list) %}
         <form id="{{list[i][0]}}" method="POST" action="">
             <div class="matches">
                 <input type="hidden" name="dateBtn" value="{{list[i][0]}}" />
-                <div id="{{ list[i][0] }}" class="card" name="cardname" onclick="document.getElementById('{{list[i][0]}}').submit();">
+                <!-- <div id="{{ list[i][0] }}" class="card" name="cardname" onclick="document.getElementById('{{list[i][0]}}').submit();"> -->
+                <div id="{{ list[i][0] }}" class={{"card-" + list[i][5]}} name="cardname" onclick="document.getElementById('{{list[i][0]}}').submit();">
                     <div class="header">
                         <div>
                             <h2 class="title">{{ list[i][3] }}</h2>

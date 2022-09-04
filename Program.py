@@ -83,11 +83,14 @@ def addlocation():
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
+    message = request.args["message"] if "message" in request.args else ""
     if request.method == 'POST':
         matchday = int(request.form.get('dateBtn'))
         return redirect(url_for('adminmatch', matchday = matchday, message = ''))
-    match_list = Functions.getData("match")
-    return render_template('admin.html', list=list(match_list.values())[::-1], n_list=len(match_list))
+    match_list = list(Functions.getData("match").values())
+    match_list.sort(key=lambda row: (row[0]))
+    print(match_list)
+    return render_template('admin.html', list=match_list[::-1], n_list=len(match_list), message=message)
     
 # ADMIN: MATCH MANAGEMENT
 
@@ -101,24 +104,35 @@ def adminmatch():
     c = conn.cursor()
 
     if request.method == 'POST':
-        status = c.execute(f"SELECT status FROM MATCHDAYS WHERE id='{matchday_id}'").fetchall()[0][0]
-        new_status = request.form.get("save")
-
-        price = "{:.2f}".format(float(request.form.get("price")))
-            
-        if new_status == "ended" and price == "0.00":
-            return redirect(url_for('adminmatch', matchday = matchday, message = "Prijs kan geen 0 zijn."))
-
-        c.execute(f"UPDATE MATCHDAYS SET price='{price}' WHERE id='{matchday_id}'") 
-        conn.commit()
-
-        if status != new_status and new_status != None:
-            c.execute(f"UPDATE MATCHDAYS SET status='{new_status}' WHERE id='{matchday_id}'")
+        # FORM SUBMIT WHEN DELETE BUTTON PRESS
+        if "delete" in request.form:
+            c.execute(f"DELETE FROM MATCHDAYS WHERE date='{matchday}'")
+            c.execute(f"DELETE FROM DATA WHERE match_id='{matchday_id}'")
             conn.commit()
+            return redirect(url_for('admin', message = f"{matchday} verwijderd en alle bijbehorende inschrijvingen."))
+
+        # FORM SUBMIT WHEN SAVE BUTTON PRESS
+        if "save" in request.form:
+            status = c.execute(f"SELECT status FROM MATCHDAYS WHERE id='{matchday_id}'").fetchall()[0][0]
+            new_status = request.form.get("save")
+
+            price = "{:.2f}".format(float(request.form.get("price")))
+                
+            if new_status == "ended" and price == "0.00":
+                return redirect(url_for('adminmatch', matchday = matchday, message = "Prijs kan geen 0 zijn."))
+
+            c.execute(f"UPDATE MATCHDAYS SET price='{price}' WHERE id='{matchday_id}'") 
+            conn.commit()
+
+            if status != new_status and new_status != None:
+                c.execute(f"UPDATE MATCHDAYS SET status='{new_status}' WHERE id='{matchday_id}'")
+                conn.commit()
             return redirect(url_for('adminmatch', matchday = matchday, message = "Status en prijs geupdate"))
 
+        # FORM SUBMIT WHEN SUBMIT BUTTON PRESS
+        status = c.execute(f"SELECT status FROM MATCHDAYS WHERE id='{matchday_id}'").fetchall()[0][0]
         if status == "open":
-            if len(request.form.get("uname")) == 0:
+            if "unsubscribe" in request.form:
                 participants = [j[0] for j in [i for i in list(Functions.getData().values()) if i[1] == matchday]]
                 unsubscribers = list(set([name for name in participants if request.form.get(name) == 'on']))
                 unsubscribers_ids = [key for key, value in Functions.getData("player").items() if value in unsubscribers]
@@ -131,31 +145,33 @@ def adminmatch():
 
                 new_message = f"Volgende spelers zijn verwijderd van de lijst: \n {' - '.join(unsubscribers)}"
                 return redirect(url_for('adminmatch', matchday = matchday, message = new_message))
-            else:
-                print("Admin adding person")
+            if "uname" in request.form:
                 signupname = request.form["uname"]
                 signup_firstname, signup_lastname = request.form["uname"].split()[0], ' '.join(request.form["uname"].split()[1:])
                 newbie = 0
 
                 status = Functions.signupcheck(matchday, signupname)
-
+                print(status)
                 if status == "unknown_p":
+                    c.execute("INSERT INTO PLAYER (firstname, lastname) VALUES (?, ?)", (signup_firstname, signup_lastname))
+                    conn.commit()
                     newbie = 1
                     pass
                 elif status == "full":
                     return redirect(url_for('adminmatch', matchday = matchday, message = "Limiet bereikt."))
                 elif status == "duplicate":
-                    return redirect(url_for('adminmatch', matchday = matchday, message = signupname + " staat al ingeschreven."))
+                    return redirect(url_for('adminmatch', matchday = matchday, message = f"{signupname} staat al ingeschreven."))
                 elif status == "not_paid":
-                    return redirect(url_for('adminmatch', matchday = matchday, message = "Vorige betalingen niet voldaan."))
+                    return redirect(url_for('adminmatch', matchday = matchday, message = f"Vorige betalingen van {signupname} zijn nog niet voldaan."))
                 elif status == "allowed":
                     pass
+
                 player_id = list(Functions.get_id("player",signupname).keys())[0]
                 data = [(player_id, matchday_id,newbie,0, 'NULL', 0)]
                 c.executemany("INSERT INTO DATA (player_id, match_id, new_player, tentative, payment_id, paid) VALUES (?, ?, ?, ?, ?, ?)", data)
                 conn.commit()
-                
-                return redirect(url_for('adminmatch', matchday = matchday, message = 'Je bent toegevoegd!'))  
+                message = f"{signupname} is toegevoegd!"
+
         elif status == "ended": 
             print(request.form)
             participants = [j[0] for j in [i for i in list(Functions.getData().values()) if i[1] == matchday]]
@@ -206,7 +222,7 @@ def admincreatematch():
         
         c.executemany("INSERT INTO MATCHDAYS (date, starttime, endtime, location, max, status, price, password, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [(date, starttime, endtime, location, capacity, status, price, password, note)])
         conn.commit()
-        return redirect(url_for('admin'))
+        return redirect(url_for('admin', message = f"{date} is toegevoegd!"))
     return render_template('admincreatematch.html', list=list(location_list.values()), n_list=len(location_list))
 
 # MATCHES
@@ -222,9 +238,10 @@ def matches():
         else:
             return redirect(url_for('signup', matchday = matchday, message = ''))
 
-    match_list = Functions.getData("match")
+    match_list = list(Functions.getData("match").values())
+    match_list.sort(key=lambda row: (row[0]))
 
-    return render_template('matches.html', list=list(match_list.values())[::-1], n_list=len(match_list))
+    return render_template('matches.html', list=match_list[::-1], n_list=len(match_list))
 
 # VOLLEYBALL: PAYMENT PAGE
 
@@ -266,7 +283,7 @@ def payment():
 def signup():
     matchday = request.args['matchday']
     matchday_id = list(Functions.get_id("match",matchday).keys())[0]
-    message = request.args['message']
+    message = [request.args['message']]
     
     conn = sqlite3.connect('Volleyball.db')
     c = conn.cursor()
@@ -277,10 +294,10 @@ def signup():
 
         if matchday_password != request.form.get("password"):
             match_list, participants_data, names = Functions.match_webdeatils(matchday)
-            message = "Wachtwoord komt niet overeen."
-            return render_template('signup.html', match_list = match_list, participants_data = participants_data, n_players = len(participants_data), message = message, names = names, n_names = len(names))
+            new_message = "Wachtwoord komt niet overeen."
+            return render_template('signup.html', match_list = match_list, participants_data = participants_data, n_players = len(participants_data), message = new_message, names = names, n_names = len(names))
         
-        message = ""
+        message = []
 
         for newParticipant in json.loads(request.form.get("uname")):
 
@@ -296,7 +313,7 @@ def signup():
                 if newbie:
                     c.execute("INSERT INTO PLAYER (firstname, lastname) VALUES (?, ?)", (signup_firstname, signup_lastname))
                     conn.commit()
-                    message += f"{signupname} toegevoegd aan db. "
+                    message.append(f"{signupname} toegevoegd aan db. ")
 
                     player_id = list(Functions.get_id("player",signupname).keys())[0]
 
@@ -304,23 +321,23 @@ def signup():
                     c.executemany("INSERT INTO DATA (player_id, match_id, new_player, tentative, payment_id, paid) VALUES (?, ?, ?, ?, ?, ?)", data)
                     conn.commit()
                 else:
-                    message += f"{signupname} niet toegevoegd, geef aan dat {signupname} nieuw is. "
+                    message.append(f"{signupname} niet toegevoegd, geef aan dat {signupname} nieuw is. ")
             
             # MATCH LIMIT REACHED
             elif status == "full":
-                message += f"{signupname} niet toegevoegd, limiet bereikt. "
+                message.append(f"{signupname} niet toegevoegd, limiet bereikt. ")
 
             # PERSON ALREADY SIGNED UP
             elif status == "duplicate":
-                message += f"{signupname} is al toegevoegd. "
+                message.append(f"{signupname} is al toegevoegd. ")
 
             # PERSON DID NOT PAY
             elif status == "not_paid":
-                message += f"{signupname} heeft nog niet betaald. "
+                message.append(f"{signupname} heeft nog niet betaald. ")
 
             #SUCCESS
             elif status == "allowed":
-                message += f"{signupname} toegevoegd! "
+                message.append(f"{signupname} toegevoegd! ")
                 
             
                 player_id = list(Functions.get_id("player",signupname).keys())[0]
@@ -328,8 +345,6 @@ def signup():
                 data = [(player_id, matchday_id,0,tentative, 'NULL', 0)]
                 c.executemany("INSERT INTO DATA (player_id, match_id, new_player, tentative, payment_id, paid) VALUES (?, ?, ?, ?, ?, ?)", data)
                 conn.commit()
-        
-        return redirect(url_for('signup', matchday = matchday, message = message))
 
     match_list, participants_data, names = Functions.match_webdeatils(matchday)
 

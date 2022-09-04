@@ -120,7 +120,7 @@ def match_webdeatils(matchday):
     match_list.append(c.execute(f"SELECT details FROM LOCATIONS WHERE name='{match_list[4]}'").fetchall()[0][0])
     participants_data = [i for i in list(getData().values()) if i[1]==matchday]
     participants_data.sort(key=lambda row: (row[0]))
-
+    print(participants_data)
     participant_names = [i[0] for i in participants_data]
     all_names = set(getData("player").values())
 

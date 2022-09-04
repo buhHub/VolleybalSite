@@ -7,9 +7,9 @@
 
 <div class="container">
     <div class="one">
-        <h1>{{match_list[1]}}</h1>
+        <h1>{{match_list[4]}}</h1>
         <p>{{match_list[2]}} - {{match_list[3]}}</p>
-        <p>{{match_list[4]}}</p>
+        <p>{{match_list[1]}}</p>
         <p>{{match_list[10]}}</p>
         <p>{{match_list[9]}}</p>
         <p>Maximum aantal mensen: {{match_list[5]}}</p>
@@ -37,8 +37,7 @@
                 {% if match_list[6] == "open" %}
                 <tr>
                     <td></td>
-                    <td>
-                        <p id="pNew"></p>
+                    <td> <br>
                         <form id="form" method="POST" action="">
                             <datalist id="names" name= "names">
                                 {% for name in names %}
@@ -46,12 +45,13 @@
                                 {% endfor %}
                                 <option disabled selected value> -- select a name -- </option>
                             </datalist>
-                            <input id="uname" autoComplete="off" list="names" class="form-control"/> 
+                            <input id="uname" autoComplete="off" list="names" class="form-control" plaeholder="Voornaam + Achternaam"/> 
                         </form>
                         <form id="form2" method="POST" action="">
                             <input type="password" name="password" placeholder="Wachtwoord">
                             <button class="btn btn-success">Submit</button>
                         </form>
+                        <p id="pNew"></p>
                     </td>
                     <td></td>
                     <td></td>
@@ -72,11 +72,9 @@
         </table>
         
 
-        {% if message != ''%}
-        <p>
-            {{ message }}
-        </p>
-        {% endif %}
+        {% for note in message %}
+        <p>{{ note }}</p>
+        {% endfor %}
     </div>
 </div>
 <script>

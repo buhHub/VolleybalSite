@@ -3,13 +3,66 @@
     justify-content: center;
 }
 
-.card {
+.card-open{
+    background-color: rgb(23, 66, 0);
+    color: aliceblue;
+    height: 10rem;
+    width: 50rem;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin: 0.5rem 0;
+    transition: 0.3s;
+}
+
+.card-closed{
+    background-color: rgb(78, 0, 0);
+    color: aliceblue;
+    height: 10rem;
+    width: 50rem;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin: 0.5rem 0;
+    transition: 0.3s;
+}
+
+.card-ended{
     background-color: rgb(67, 67, 67);
     color: aliceblue;
     height: 10rem;
     width: 50rem;
     border-radius: 10px;
     display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin: 0.5rem 0;
+    transition: 0.3s;
+}
+
+.card-addevent{
+    background-color: rgb(67, 67, 67);
+    color: aliceblue;
+    height: 5rem;
+    width: 50rem;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0.5rem 0;
+    transition: 0.3s;
+}
+
+.card{
+    background-color: rgb(67, 67, 67);
+    color: aliceblue;
+    height: 10rem;
+    width: 50rem;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
     justify-content: space-between;
     margin: 0.5rem 0;
     transition: 0.3s;

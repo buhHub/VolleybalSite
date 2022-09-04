@@ -6,7 +6,7 @@
     function statusChange(slction){
         document.getElementById('save').value = slction.value;
     }
-    </script>
+</script>
 
 <div class="container">
     <div class="one">
@@ -26,15 +26,17 @@
               <option value="closed" {% if match_list[6] == "closed" %} selected="selected" {% endif %}>Gesloten voor inschrijvingen en betalingen</option>
             </select>
 
-
             <p>Maximum aantal mensen: {{match_list[5]}}</p>
             <p>
                 <label for="price">Prijs:</label>
-                <input name="price" type="number" id="price" step="0.10" value="{{match_list[7]}}" ><br>    </p>
+                <input name="price" type="number" id="price" step="0.10" value="{{match_list[7]}}" ><br>
+            </p>
             
-
-                <button name="save" id="save" type="submit" value="{{match_list[6]}}">Opslaan</button>
-
+            <button name="save" id="save" type="submit" value="{{match_list[6]}}">Opslaan</button>
+            <button name="delete" id="delete" type="submit" value="">Verwijder event</button>
+        </form>
+        <br>
+        <form id="form2" method="POST" action="">
             <table style="width:100%;">
                 <thead>
                     <tr>
@@ -71,9 +73,10 @@
                                 {% endfor %}
                                 <option disabled selected value> -- select a name -- </option>
                             </datalist>
-                            <input name="uname" autoComplete="off" list="names" class="form-control" autofocus/> 
+                            <input name="uname" autoComplete="off" list="names" class="form-control" form="form3" autofocus/> 
                         </td>
-                        <td><input type="submit" name="submit" value="Uitschrijven" method="POST" action="/"> </td>
+                        <!-- <td><input type="submit" name="submit" value="Uitschrijven" method="POST" action="/"> </td> -->
+                        <td><button name="unsubscribe" id="unsubscribe" type="submit" value="">Verwijder event</button></td>
                     </tr>  
                     {% elif match_list[6] == "ended" %}
 
@@ -85,13 +88,16 @@
                     {% endif %}              
                 </tbody>
             </table>
+        </form>
            
 
-            {% if message != ''%}
-            <p>
-                {{ message }}
-            </p>
-            {% endif %}
+        {% if message != ''%}
+        <p>
+            {{ message }}
+        </p>
+        {% endif %}
+
+        <form id="form3" method="POST" action="">
         </form>
     </div>
 </div>

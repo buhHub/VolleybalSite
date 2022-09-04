@@ -17,7 +17,9 @@
         <form id="{{list[i][0]}}" method="POST" action="">
             <div class="matches">
                 <input type="hidden" name="dateBtn" value="{{list[i][0]}}" />
-                <div id="{{ list[i][0] }}" class="card" name="cardname" onclick="document.getElementById('{{list[i][0]}}').submit();">
+                <!-- <div id="{{ list[i][0] }}" class="card" name="cardname" onclick="document.getElementById('{{list[i][0]}}').submit();"> -->
+                <div id="{{ list[i][0] }}" class={{"card-" + list[i][5]}} name="cardname" onclick="document.getElementById('{{list[i][0]}}').submit();">
+                
                     <div class="header">
                         <div>
                             <h2 class="title">{{ list[i][3] }}</h2>
