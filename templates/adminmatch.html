@@ -11,7 +11,7 @@
 <div class="container">
     <div class="one">
         <form id="form" method="POST" action="">
-            <h1>{{match_list[1]}}</h1>
+            <h1>{{match_list[11]}}</h1>
             <p>{{match_list[2]}} - {{match_list[3]}}</p>
             <p>{{match_list[4]}}</p>
             <p>{{match_list[10]}}</p>
@@ -73,10 +73,11 @@
                                 {% endfor %}
                                 <option disabled selected value> -- select a name -- </option>
                             </datalist>
-                            <input name="uname" autoComplete="off" list="names" class="form-control" form="form3" autofocus/> 
+                            <input name="uname" autoComplete="off" list="names" class="form-control" form="form3" autofocus/>
+                            <button class="btn btn-success" form="form3">Inschrijven</button> 
                         </td>
                         <!-- <td><input type="submit" name="submit" value="Uitschrijven" method="POST" action="/"> </td> -->
-                        <td><button name="unsubscribe" id="unsubscribe" type="submit" value="">Verwijder event</button></td>
+                        <td><button name="unsubscribe" id="unsubscribe" type="submit" value="">Uitschrijven</button></td>
                     </tr>  
                     {% elif match_list[6] == "ended" %}
 

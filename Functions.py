@@ -1,6 +1,7 @@
 from xml.sax import default_parser_list
 from flask import Flask, flash, redirect, render_template, request, session, url_for, jsonify, abort
 import sqlite3
+import datetime
 
 from mollie.api.client import Client
 from mollie.api.error import Error
@@ -116,11 +117,15 @@ def match_webdeatils(matchday):
     conn = sqlite3.connect('Volleyball.db')
     c = conn.cursor()
 
-    match_list = [[key] + value[:-1] for key, value in getData("match").items() if value[0] == matchday][0]
+    match_list = [[key] + value for key, value in getData("match").items() if value[0] == matchday][0]
     match_list.append(c.execute(f"SELECT details FROM LOCATIONS WHERE name='{match_list[4]}'").fetchall()[0][0])
+    i=match_list[1]
+    match_list.append(datetime.datetime(int(i[:4]), int(i[4:6]), int(i[6:]), 0, 0).strftime("%A, %d %b %Y").title())
+    print(match_list)
+
     participants_data = [i for i in list(getData().values()) if i[1]==matchday]
     participants_data.sort(key=lambda row: (row[0]))
-    print(participants_data)
+
     participant_names = [i[0] for i in participants_data]
     all_names = set(getData("player").values())
 

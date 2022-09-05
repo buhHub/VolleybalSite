@@ -1,26 +1,50 @@
 {% extends 'layout.html' %}
 
 {% block body %}
+<link rel="stylesheet" href="../static/payment.css">
 
-<p></p>
-<p></p>
+<script>
+    var c = 0;
+    var price = {{match_list[7]}};
+    function handleClick(cb) {
+        if (cb.checked) {
+            c += 1;
+        }
+        else {
+            c-=1;
+        }
+        var new_price = price *c;
+        document.getElementById("submit").value = "€" +String(parseFloat(new_price).toFixed(2)) + " betalen";
+    }       
+</script>
 
 <div class="container">
     <div class="one">
-        <form method="POST" action="">
-            <h1>{{match_list[1]}}</h1>
-            <p>{{match_list[2]}} - {{match_list[3]}}</p>
-            <p>{{match_list[4]}}</p>
-            <p>{{match_list[10]}}</p>
-            <p>{{match_list[9]}}</p>
-            <p>Maximum aantal mensen: {{match_list[5]}}</p>
-            <p>Prijs: {{match_list[7]}}</p>
+        <div class="matches">
+            <div class="card-ended">
+                <div class="header">
+                    <div>
+                        <h2 class="title">{{match_list[4]}}</h2>
+                        <p class="date">{{match_list[12]}}</p>
+                    </div>
+                    <div class="time">
+                        <h4 class="stamp">{{match_list[2]}}</h4>
+                        <h4 class="stamp">{{match_list[3]}}</h4>
+                    </div>
+                </div>
+                <div class="participants">
+                    <p>{{ match_list[10] }} / {{ match_list[5] }}</p>
+                </div>
+            </div>
+        </div>
+        <p></p>
 
 
+            <div class="table">
             <table style="width:100%;">
                 <thead>
                     <tr>
-                        <th></th>
+                        <th>Prijs: €{{match_list[7]}}</th>
                         <th>Ingeschreven:</th>
                         <th>Betaald:</th>
                     </tr>
@@ -30,7 +54,7 @@
                     {% for i in range(n_players) %}
                     <tr>
                         {% if match_list[6] != 1 and participants_data[i][5] == 0 %}
-                        <td><input type="checkbox" name="{{ participants_data[i][0] }}"></td>
+                        <td><input type="checkbox" name="{{ participants_data[i][0] }}" onclick='handleClick(this)'></td>
                         {% else %}
                         <td></td>
                         {% endif %}  
@@ -40,12 +64,13 @@
                     {% endfor %}
 
                     <tr>
-                        <td><input type="submit" name="submit" value="Betalen" method="POST" action="/"> </td>
+                        <td><input type="submit" id="submit" name="submit" value="Betalen" method="POST" action="/" class="btn btn-success"> </td>
                         <td></td>
                         <td></td>
                     </tr>                  
                 </tbody>
             </table>
+            </div>
            
 
             {% if message != ''%}

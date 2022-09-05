@@ -1,76 +1,89 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-
-<p></p>
-<p></p>
+<link rel="stylesheet" href="../static/signup.css">
 
 <div class="container">
     <div class="one">
-        <h1>{{match_list[4]}}</h1>
-        <p>{{match_list[2]}} - {{match_list[3]}}</p>
-        <p>{{match_list[1]}}</p>
-        <p>{{match_list[10]}}</p>
+        <div class="matches">
+            <div class="card-open">
+                <div class="header">
+                    <div>
+                        <h2 class="title">{{match_list[4]}}</h2>
+                        <p class="date">{{match_list[12]}}</p>
+                    </div>
+                    <div class="time">
+                        <h4 class="stamp">{{match_list[2]}}</h4>
+                        <h4 class="stamp">{{match_list[3]}}</h4>
+                    </div>
+                </div>
+                <div class="participants">
+                    <p>{{ match_list[10] }} / {{ match_list[5] }}</p>
+                </div>
+            </div>
+        </div>
+        <br>
         <p>{{match_list[9]}}</p>
-        <p>Maximum aantal mensen: {{match_list[5]}}</p>
+        <div class="table">
+            <table style="width:100%;">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Ingeschreven:</th>
+                        <th></th>          
+                        <th></th>            
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in range(n_players) %}
+                    <tr>
+                        <td>{{ i+1 }}</td>
+                        <td>{{participants_data[i][0]}}</td>
+                        <td>{% if participants_data[i][2] == 1 %} Nieuw {% endif %}</td>    
+                        <td>{% if participants_data[i][3] == 1 %} Onder voorbehoud {% endif %}</td>      
+                    </tr>
+                    {% endfor %}
 
-
-        <table style="width:100%;">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Ingeschreven:</th>
-                    <th></th>          
-                    <th></th>            
-                </tr>
-            </thead>
-            <tbody>
-                {% for i in range(n_players) %}
-                <tr>
-                    <td>{{ i+1 }}</td>
-                    <td>{{participants_data[i][0]}}</td>
-                    <td>{% if participants_data[i][2] == 1 %} Nieuw {% endif %}</td>    
-                    <td>{% if participants_data[i][3] == 1 %} Onder voorbehoud {% endif %}</td>      
-                </tr>
-                {% endfor %}
-
-                {% if match_list[6] == "open" %}
-                <tr>
-                    <td></td>
-                    <td> <br>
-                        <form id="form" method="POST" action="">
-                            <datalist id="names" name= "names">
-                                {% for name in names %}
-                                <option value= "{{name}}" SELECTED>{{name}}</option>"
-                                {% endfor %}
-                                <option disabled selected value> -- select a name -- </option>
-                            </datalist>
-                            <input id="uname" autoComplete="off" list="names" class="form-control" placeholder="Voornaam + Achternaam"/> 
-                            <button class="btn btn-success">Voeg toe</button>
-                        </form>
-                        <form id="form2" method="POST" action="">
-                            <input type="password" name="password" placeholder="Wachtwoord">
-                            <button class="btn btn-success">Inschrijven</button>
-                        </form>
-                        <p id="pNew"></p>
-                    </td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td>
-                        <label for="newby">Nieuw</label>
-                        <input id="new" type="checkbox" name="newby"> <br>
-                        <label for="tentative">Onder voorbehoud</label>
-                        <input id="tentative" type="checkbox" name="tentative">
-                    </td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                {% endif %}                    
-            </tbody>
-        </table>
+                    {% if match_list[6] == "open" %}
+                    <tr>
+                        <td></td>
+                        <td> <br>
+                                <form id="form" method="POST" action="">
+                                        <datalist id="names" name= "names">
+                                            {% for name in names %}
+                                            <option value= "{{name}}" SELECTED>{{name}}</option>"
+                                            {% endfor %}
+                                            <option disabled selected value> -- select a name -- </option>
+                                        </datalist>
+                                        <input id="uname" autoComplete="off" list="names" class="form-control" placeholder="Voornaam + Achternaam"/> 
+                                    
+                                    <button class="btn btn-success">Voeg toe</button>
+                                </form>
+                            </div>
+                            <form id="form2" method="POST" action="">
+                                <input type="password" name="password" placeholder="Wachtwoord">
+                                <button class="btn btn-success">Inschrijven</button>
+                            </form>
+                            <p id="pNew"></p>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>
+                            <label for="newby">Nieuw</label>
+                            <input id="new" type="checkbox" name="newby"> <br>
+                            <label for="tentative">Onder voorbehoud</label>
+                            <input id="tentative" type="checkbox" name="tentative">
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    {% endif %}                    
+                </tbody>
+            </table>
+        </div>
         
 
         {% for note in message %}
