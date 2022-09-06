@@ -126,8 +126,8 @@
                 </select>
             </div>
             <div class="input-group input-group-sm mb-3">
-                <span class="input-group-text" id="pricelabel" {% if match_list[6]=="ended" %} style="display: block" {%
-                    else %} style="display: none" {% endif %}>Prijs</span>
+                <span class="input-group-text" id="pricelabel" {% if match_list[6]=="ended" %} style="display: block; width:8rem; text-align: left;" {%
+                    else %} style="display: none; " {% endif %} >Prijs:</span>
                 <input name="price" class="form-control" type="number" id="price" step="0.10" value="{{match_list[7]}}"
                     {% if match_list[6]=="ended" %} style="display: block" {% else %} style="display: none" {% endif %}>
             </div>
