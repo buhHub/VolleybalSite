@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<link rel="stylesheet" href="../static/matches.css">
+
+<div class="container-fluid">
+    <div class="one">
+        <form name="login" id="login" method="POST" action="">
+            <label for="uname"></label>
+            <input name="uname" id="uname" type="text" placeholder="Gebruikersnaam">
+            <label for="password"></label>
+            <input name="password" id="password" type="password" placeholder="Wachtwoord">
+            <button type="submit">log in</button>
+        </form> 
+    </div>
+</div>
+{% endblock %}

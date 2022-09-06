@@ -1,4 +1,6 @@
 from flask import Flask, flash, redirect, render_template, request, session, url_for, jsonify, abort
+from flask_login import LoginManager, login_user, login_required, UserMixin, current_user, logout_user
+
 import sqlite3
 import os.path as path
 import datetime
@@ -15,7 +17,40 @@ from mollie.api.error import Error
 import mollie
 
 app = Flask(__name__)
+app.secret_key = "Made by Buh"
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "adminlogin"
 locale.setlocale(locale.LC_TIME, "nl_NL")
+
+class User(UserMixin):
+    pass
+
+def logindata():
+    return {value[0]: {'password': value[1]} for key, value in list(Functions.getData("login").items()) if value[2] == 1}
+
+@login_manager.user_loader
+def user_loader(uname):
+    unames = logindata()
+    if uname not in unames:
+        return
+
+    user = User()
+    user.id = uname
+    return user
+
+
+@login_manager.request_loader
+def request_loader(request):
+    unames = logindata()
+    uname = request.form.get('uname')
+    if uname not in unames:
+        return
+
+    user = User()
+    user.id = uname
+    return user
+
 
 # REMOVE CACHING POSSIBILITIES [PDF WILL UPDATE AFTER REFRESH]
 
@@ -84,7 +119,73 @@ def addlocation():
 
 # ADMIN
 
+@app.route('/adminregistration', methods=['GET', 'POST'])
+@login_required
+def adminregistration():
+    if request.method == "POST":
+        uname = request.form.get("uname")
+        pw1 = request.form.get("password")
+        pw2 = request.form.get("confirmpassword")
+
+        if pw1 != pw2:
+            return render_template('adminregistration.html', message = "Wachtwoorden komen niet overeen", uname = uname)
+
+        if uname == "":
+            return render_template('adminregistration.html', message = "Geen gebruikersnaam aangegeven", uname = uname)
+
+        if pw1 == "":
+            return render_template('adminregistration.html', message = "Geen wachtwoord ingevoerd", uname = uname)
+
+        if pw2 == "":
+            return render_template('adminregistration.html', message = "Bevestig je wachtwoord", uname = uname)
+
+        conn = sqlite3.connect('Volleyball.db')
+        c = conn.cursor()
+
+        user_id = c.execute(f"SELECT id FROM LOGIN WHERE username='{current_user.id}'").fetchall()[0][0]
+        data = [uname, (pw1), user_id]
+        c.execute(f"INSERT INTO LOGIN (username, hash, activated) VALUES (?,?,?)", data)
+        conn.commit()
+        return redirect(url_for("admin", message = f"{uname} succesvol toegevoegd door {current_user.id}."))
+
+        
+
+    message = ""
+    uname = ""
+    return render_template('adminregistration.html', message = message, uname = uname)
+
+# ADMIN
+
+@app.route('/adminlogin', methods=['GET', 'POST'])
+def adminlogin():
+    if request.method == "POST":
+        uname = request.form.get("uname")
+        unames = logindata()
+        if uname in unames and (request.form['password']) == (unames[uname]['password']):
+            user = User()
+            user.id = uname
+            login_user(user)
+            return redirect(url_for('admin'))
+    return render_template('adminlogin.html')
+    
+@app.route('/protected')
+@login_required
+def protected():
+    return 'Logged in as: ' + current_user.id
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for("matches"))
+
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    return redirect(url_for("adminlogin"))
+
+# ADMIN
+
 @app.route('/admin', methods=['GET', 'POST'])
+@login_required
 def admin():
     message = request.args["message"] if "message" in request.args else ""
     if request.method == 'POST':
@@ -98,6 +199,7 @@ def admin():
 # ADMIN: MATCH MANAGEMENT
 
 @app.route('/adminmatch', methods=['GET', 'POST'])
+@login_required
 def adminmatch():
     matchday = request.args['matchday']
     matchday_id = [key for key, value in Functions.getData("match").items() if value[0] == matchday][0]
@@ -108,6 +210,7 @@ def adminmatch():
 
     if request.method == 'POST':
         message = ""
+        print(request.form)
         # FORM SUBMIT WHEN DELETE BUTTON PRESS
         if "delete" in request.form:
             c.execute(f"DELETE FROM MATCHDAYS WHERE date='{matchday}'")
@@ -209,6 +312,7 @@ def adminmatch():
 # CREATE MATCH ADMIN
 
 @app.route('/admincreatematch', methods=['GET', 'POST'])
+@login_required
 def admincreatematch():
     location_list = (Functions.getData("location"))
     if request.method == 'POST':
@@ -297,11 +401,10 @@ def signup():
 
     if request.method == 'POST':
         matchday_password = [value[-3] for key, value in Functions.getData("match").items() if value[0] == matchday][0]
-        print(matchday_password)
 
         if matchday_password != request.form.get("password"):
             match_list, participants_data, names = Functions.match_webdeatils(matchday)
-            new_message = "Wachtwoord komt niet overeen."
+            new_message = ["Wachtwoord komt niet overeen."]
             return render_template('signup.html', match_list = match_list, participants_data = participants_data, n_players = len(participants_data), message = new_message, names = names, n_names = len(names))
         
         message = []

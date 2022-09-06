@@ -78,4 +78,8 @@ testdata = [("De Vaart", "Koggenland 88, 1447CN Purmerend", 60),
 ]
 c.executemany("INSERT INTO LOCATIONS (name, details, max) VALUES (?, ?, ?)", testdata)
 
+c.execute("CREATE TABLE IF NOT EXISTS LOGIN ([id] INTEGER PRIMARY KEY,[username] text, [hash] text, [activated] int)")
+testdata = [("Buhbie", "Flipchineesje25", 1)]
+c.executemany("INSERT INTO LOGIN (username, hash, activated) VALUES (?, ?, ?)", testdata)
+
 conn.commit()

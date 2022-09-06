@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<link rel="stylesheet" href="../static/matches.css">
+
+<div class="container-fluid">
+    <div class="one">
+        <form name="signup" id="signup" method="POST" action="">
+            <label for="uname"></label>
+            <input name="uname" id="uname" type="text" autocomplete="off" autofocus {% if uname != "" %} value="{{uname}}"{% endif %}placeholder="Bedenk een gebruikersnaam">
+            <label for="password"></label>
+            <input name="password" id="password" type="password" autocomplete="off" placeholder="Geef een wachtwoord">
+            <label for="confirmpassword"></label>
+            <input name="confirmpassword" id="confirmpassword" type="password" autocomplete="off" placeholder="Voer wachtwoord nogmaals in">
+            <button type="submit">Registreer</button>
+        </form> 
+        {% if message != "" %}
+        <p>{{message}}</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

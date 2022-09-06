@@ -15,6 +15,7 @@ def getData(mode="all"):
     player_list = {i[0]:' '.join(i[1:]) for i in c.execute("SELECT * FROM PLAYER").fetchall()}
     data_list = {i[0]: list(i[1:]) for i in c.execute("SELECT * FROM DATA").fetchall()}
     location_list = {i[0]: list(i[1:]) for i in c.execute("SELECT * FROM LOCATIONS").fetchall()}
+    login_list = {i[0]: list(i[1:]) for i in c.execute("SELECT * FROM LOGIN").fetchall()}
 
     # Data_list manupalation:
     #   {i: [name, match, new, tent, p_id]}
@@ -34,6 +35,8 @@ def getData(mode="all"):
         return player_list
     elif mode == "location":
         return location_list
+    elif mode == "login":
+        return login_list
     elif mode == "all":
         return data_list
     else:

@@ -13,7 +13,11 @@
             4: Limiet
             5: Open voor inschrijven
          -->
-        <p>{{message}}</p>
+        {% if message != "" %}
+        <div class="alert alert-warning" role="alert">
+            {{message}}
+        </div>
+        {% endif %}
         <div class="matches">
             <a href="/admincreatematch">
                 <input type="hidden" name="actionBtn" value="create_event" />

@@ -15,6 +15,12 @@
         }
         var new_price = price *c;
         document.getElementById("submit").value = "€" +String(parseFloat(new_price).toFixed(2)) + " betalen";
+        if (c>0){
+            document.getElementById("submit").style.display = "block"; // to show
+        }
+        else {
+            document.getElementById("submit").style.display = "none"; // to hide    
+        }
     }       
 </script>
 
@@ -37,11 +43,10 @@
                 </div>
             </div>
         </div>
-        <p></p>
+        
 
-
-            <div class="table">
-            <table style="width:100%;">
+            <div>
+            <table class="table" style="width:100%;">
                 <thead>
                     <tr>
                         <th>Prijs: €{{match_list[7]}}</th>
@@ -61,16 +66,13 @@
                         <td> {{participants_data[i][0]}} </td>
                         <td> {% if participants_data[i][5] %} Yes! :) {% else %} Nope :( {% endif %} </td>
                     </tr>
-                    {% endfor %}
-
-                    <tr>
-                        <td><input type="submit" id="submit" name="submit" value="Betalen" method="POST" action="/" class="btn btn-success"> </td>
-                        <td></td>
-                        <td></td>
-                    </tr>                  
+                    {% endfor %}               
                 </tbody>
             </table>
             </div>
+
+            <br>
+            <input type="submit" id="submit" name="submit" value="€0.00 Betalen" method="POST" action="/" class="btn btn-success" style="display: none"> 
            
 
             {% if message != ''%}

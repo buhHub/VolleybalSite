@@ -24,8 +24,8 @@
         </div>
         <br>
         <p>{{match_list[9]}}</p>
-        <div class="table">
-            <table style="width:100%;">
+        <div>
+            <table class="table" style="width:100%;">
                 <thead>
                     <tr>
                         <th></th>
@@ -42,53 +42,50 @@
                         <td>{% if participants_data[i][2] == 1 %} Nieuw {% endif %}</td>    
                         <td>{% if participants_data[i][3] == 1 %} Onder voorbehoud {% endif %}</td>      
                     </tr>
-                    {% endfor %}
-
-                    {% if match_list[6] == "open" %}
-                    <tr>
-                        <td></td>
-                        <td> <br>
-                                <form id="form" method="POST" action="">
-                                        <datalist id="names" name= "names">
-                                            {% for name in names %}
-                                            <option value= "{{name}}" SELECTED>{{name}}</option>"
-                                            {% endfor %}
-                                            <option disabled selected value> -- select a name -- </option>
-                                        </datalist>
-                                        <input id="uname" autoComplete="off" list="names" class="form-control" placeholder="Voornaam + Achternaam"/> 
-                                    
-                                    <button class="btn btn-success">Voeg toe</button>
-                                </form>
-                            </div>
-                            <form id="form2" method="POST" action="">
-                                <input type="password" name="password" placeholder="Wachtwoord">
-                                <button class="btn btn-success">Inschrijven</button>
-                            </form>
-                            <p id="pNew"></p>
-                        </td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td>
-                            <label for="newby">Nieuw</label>
-                            <input id="new" type="checkbox" name="newby"> <br>
-                            <label for="tentative">Onder voorbehoud</label>
-                            <input id="tentative" type="checkbox" name="tentative">
-                        </td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    {% endif %}                    
+                    {% endfor %}             
                 </tbody>
             </table>
         </div>
-        
+        <br>
+        {% if match_list[6] == "open" %}
+        <form id="form" method="POST" action="">
+            <div class="input-group mb-3">
+                <div class="input-group-text">
+                    <span id="basic-addon3" style="margin: 0 10px 0 0">Nieuw</span>
+                  <input title="nieuw" class="form-check-input mt-0"  id="new" type="checkbox" name="newby">
+                </div>
+                <div class="input-group-text">
+                    <span id="basic-addon3" style="margin: 0 10px 0 0">Onder voorbehoud</span>
+                  <input class="form-check-input mt-0" id="tentative" type="checkbox" name="tentative">
+                </div>
+                <datalist id="names" name= "names">
+                    {% for name in names %}
+                    <option value= "{{name}}" SELECTED>{{name}}</option>"
+                    {% endfor %}
+                    <option disabled selected value> -- select a name -- </option>
+                </datalist>
 
-        {% for note in message %}
-        <p>{{ note }}</p>
-        {% endfor %}
+                <input type="text" id="uname" class="form-control" autoComplete="off" list="names" placeholder="Voornaam + Achternaam">
+                <button class="btn btn-success">Voeg toe</button>
+            </div>
+        </form>
+
+        <p id="pNew"></p>
+        </div>
+            <form id="form2" method="POST" action="">
+                <div class="input-group mb-3">
+                    <input type="password" class="form-control" placeholder="Wachtwoord" name="password">
+                    <button class="btn btn-success">Inschrijven</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}  
+        
+        <div>
+            {% for note in message %}
+            <p>{{ note }}</p>
+            {% endfor %}
+        </div>
     </div>
 </div>
 <script>
