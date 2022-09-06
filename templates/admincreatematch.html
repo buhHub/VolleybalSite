@@ -11,52 +11,62 @@
     buffer[2] = "{{list[n][2]}}"
     DivTxt['{{n}}'] = buffer
     {% endfor %}
-    
-    function getText(slction){
+
+    function getText(slction) {
         console.log(buffer)
         txtSelected = slction.selectedIndex;
         document.getElementById('textDiv').innerHTML = DivTxt[txtSelected][1];
         document.getElementById('capacity').value = DivTxt[txtSelected][2];
     }
-    </script>
+</script>
 
-    <form id="matchdetails"  method="POST" action="">
-        <div class="input-group mb-3">
-            <label class="input-group-text" for="location">Locatie:</label>
-            <select class="form-select" id="location" name="location" onchange = "getText(this)">
-                {% for data in list %}
-                <option value="{{data[0]}}">{{data[0]}}</option>
-                {% endfor %}
-            </select>
-            <span class="input-group-text" id="textDiv">{{list[0][1]}}</span>
-            <button class="btn btn-outline-primary" type="submit" form="form2" id="button-addon1">Nieuwe Locatie</button>
-        </div>
+<link rel="stylesheet" href="../static/admincreatematch.css">
 
-    <div class="input-group mb-3">
-        <span class="input-group-text" id="basic-addon1">Aantal personen:</span>
-        <input name="capacity" type="number" id="capacity" value="36" required class="form-control" placeholder="">
-    </div> 
+<div class="container-fluid">
+    <div class="one">
 
-    <div class="input-group mb-3" stype="width: 100%;">
-        <input class="input-group-text" name="date" type="date" id="date" required>
-        <input class="input-group-text" name="starttime" type="time" id="starttime" value="20:00" required>
-        <input class="input-group-text" name="endtime" type="time" id="endtime" value="23:30" required>
-    </div> 
+        <form id="matchdetails" method="POST" action="">
+            <div class="input-group input-group-sm mb-3">
+                <label class="input-group-text" for="location">Locatie:</label>
+                <select class="form-select" id="location" name="location" onchange="getText(this)">
+                    {% for data in list %}
+                    <option value="{{data[0]}}">{{data[0]}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" id="textDiv">{{list[0][1]}}</span>
+                <button class="btn btn-outline-primary" type="submit" form="form2" id="button-addon1">Nieuwe
+                    Locatie</button>
+            </div>
 
-    <div class="input-group mb-3">
-        <div class="input-group-text">
-            <span id="basic-addon3" style="margin: 0 10px 0 0">Direct openstellen voor inschrijvingen</span>
-          <input class="form-check-input mt-0"  name="open" type="checkbox" id="open">
-        </div>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" id="basic-addon1">Aantal personen:</span>
+                <input name="capacity" type="number" id="capacity" value="36" required class="form-control"
+                    placeholder="">
+            </div>
+
+            <div class="input-group input-group-sm mb-3" stype="max-width: 15%;">
+                <input class="input-group-text" name="date" type="date" id="date" required>
+                <input class="input-group-text" name="starttime" type="time" id="starttime" value="20:00" required>
+                <input class="input-group-text" name="endtime" type="time" id="endtime" value="23:30" required>
+            </div>
+
+            <div class="input-group input-group-sm mb-3">
+                <div class="input-group-text">
+                    <span id="basic-addon3" style="margin: 0 10px 0 0">Direct openstellen voor inschrijvingen</span>
+                    <input class="form-check-input mt-0" name="open" type="checkbox" id="open">
+                </div>
+            </div>
+
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" id="basic-addon1">Opmerkingen:</span>
+                <input name="note" type="text" id="note" class="form-control" placeholder="">
+            </div>
+            <button type="submit" name="submit_button" class="btn btn-primary">Event Toevoegen</button>
+        </form>
+        <form action="/addlocation" id="form2">
+        </form>
     </div>
-
-    <div class="input-group mb-3">
-        <span class="input-group-text" id="basic-addon1">Opmerking:</span>
-        <input name="note" type="text" id="note" class="form-control" placeholder="">
-      </div>
-    <button type="submit" name="submit_button" class="btn btn-primary">Event Toevoegen</button>
-</form>
-<form action="/addlocation" id="form2">
-</form>
-
+</div>
 {% endblock %}

@@ -1,22 +1,30 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<link rel="stylesheet" href="../static/matches.css">
-
+<link rel="stylesheet" href="../static/login.css">
 <div class="container-fluid">
     <div class="one">
-        <form name="signup" id="signup" method="POST" action="">
-            <label for="uname"></label>
-            <input name="uname" id="uname" type="text" autocomplete="off" autofocus {% if uname != "" %} value="{{uname}}"{% endif %}placeholder="Bedenk een gebruikersnaam">
-            <label for="password"></label>
-            <input name="password" id="password" type="password" autocomplete="off" placeholder="Geef een wachtwoord">
-            <label for="confirmpassword"></label>
-            <input name="confirmpassword" id="confirmpassword" type="password" autocomplete="off" placeholder="Voer wachtwoord nogmaals in">
-            <button type="submit">Registreer</button>
-        </form> 
-        {% if message != "" %}
-        <p>{{message}}</p>
-        {% endif %}
+        <div class="matches">
+            <div class="center">
+                <div class="card">
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="uname" id="uname" type="text" form="signup"
+                            placeholder="Bedenk een gebruikersnaam" {% if uname !="" %} value="{{uname}}" {% endif %}>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control" name="password" id="password" form="signup"
+                            placeholder="Geef een wachtwoord">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control" name="confirmpassword" id="confirmpassword"
+                            form="signup" placeholder="Voer wachtwoord nogmaals in">
+                    </div>
+                    <button type="submit" id="btn" class="btn btn-primary" form="login">Inschrijven</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<form name="signup" id="signup" method="POST" action=""></form>
 {% endblock %}

@@ -158,6 +158,7 @@ def adminregistration():
 
 @app.route('/adminlogin', methods=['GET', 'POST'])
 def adminlogin():
+    uname = request.args["uname"] if "uname" in request.args else ""
     if request.method == "POST":
         uname = request.form.get("uname")
         unames = logindata()
@@ -166,7 +167,7 @@ def adminlogin():
             user.id = uname
             login_user(user)
             return redirect(url_for('admin'))
-    return render_template('adminlogin.html')
+    return render_template('adminlogin.html', uname = uname)
     
 @app.route('/protected')
 @login_required

@@ -1,17 +1,13 @@
+.one{
+    height: 100vh;
+    width: 100vw-24px;
+    max-width: 50rem;
+    margin: 0 auto 0 auto;
+}
+
 .matches {
     display: flex;
     justify-content: center;
-}
-.one{
-    max-width:50rem;
-    margin: 0 auto;
-}
-
-.signup{
-    width:100%;
-    display: flex;
-    flex-direction: row;
-    justify-content:space-between;
 }
 
 .card-open{
