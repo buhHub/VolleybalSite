@@ -3,10 +3,6 @@
     justify-content: center;
 }
 
-.container{
-    width: 50rem
-}
-
 .card-open{
     background-color: rgb(23, 66, 0);
     color: aliceblue;

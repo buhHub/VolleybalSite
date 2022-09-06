@@ -69,7 +69,7 @@
 <!-- CSS -->
 <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css"/>
 
-<div class="container" style="width: 50rem;">
+<div class="container">
     <div class="one">
         {% if message != "" %}
         <div class="alert alert-warning" role="alert">
@@ -101,8 +101,8 @@
                 <label class="input-group-text" for="status">Status:</label>
                 <select class="form-select" name="status" id="status" onchange="statusChange(this)">
                     <option value="open" {% if match_list[6] == "open" %} selected="selected" {% endif %}>Open voor inschrijvingen</option>
-                    <option value="ended" {% if match_list[6] == "ended" %} selected="selected" {% endif %}>Afgelopen en open voor betalingen</option>
                     <option value="closed" {% if match_list[6] == "closed" %} selected="selected" {% endif %}>Gesloten voor inschrijvingen en betalingen</option>
+                    <option value="ended" {% if match_list[6] == "ended" %} selected="selected" {% endif %}>Afgelopen en open voor betalingen</option>
                 </select>
             </div>
             <div class="input-group mb-3">
@@ -116,7 +116,7 @@
         <br>
         <br>
         <form id="form2" method="POST" action="">
-            <table style="width:100%;" class="table">
+            <table class="table">
                 <thead>
                     <tr>
                         <th>Ingeschreven:</th>
@@ -133,12 +133,12 @@
                         {% if match_list[6] == "ended" %}
                             <td> {% if participants_data[i][5] == 1 %} Yes! :) {% else %} Nope :( {% endif %} </td>
                             {% if participants_data[i][5] == 0 %}
-                                <td><input type="checkbox" name="{{ participants_data[i][0] }}" onclick='handleClick(this)'></td>
+                                <td><input type="checkbox" class="form-check-input" name="{{ participants_data[i][0] }}" onclick='handleClick(this)'></td>
                             {% else %}
                                 <td></td>
                             {% endif %}  
                         {% else %}
-                            <td><input type="checkbox" name="{{ participants_data[i][0] }}" onclick='handleClick(this)'></td>
+                            <td><input type="checkbox" class="form-check-input" name="{{ participants_data[i][0] }}" onclick='handleClick(this)'></td>
                         {% endif %}
                     </tr>
                     {% endfor %}

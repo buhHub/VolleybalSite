@@ -3,10 +3,6 @@
     justify-content: center;
 }
 
-.container{
-    width: 50rem
-}
-
 .signup{
     width:100%;
     display: flex;
