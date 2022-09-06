@@ -223,6 +223,7 @@ def adminmatch():
         if "save" in request.form:
             status = c.execute(f"SELECT status FROM MATCHDAYS WHERE id='{matchday_id}'").fetchall()[0][0]
             new_status = request.form.get("save")
+            note = request.form.get("note")
 
             price = "{:.2f}".format(float(request.form.get("price")))
                 
@@ -230,6 +231,7 @@ def adminmatch():
                 return redirect(url_for('adminmatch', matchday = matchday, message = "Prijs kan geen 0 zijn."))
 
             c.execute(f"UPDATE MATCHDAYS SET price='{price}' WHERE id='{matchday_id}'") 
+            c.execute(f"UPDATE MATCHDAYS SET note='{note}' WHERE id='{matchday_id}'") 
             conn.commit()
 
             if status != new_status and new_status != None:

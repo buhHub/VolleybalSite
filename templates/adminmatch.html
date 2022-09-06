@@ -3,10 +3,10 @@
 {% block body %}
 <link rel="stylesheet" href="../static/adminmatch.css">
 <script language="JavaScript">
-    
-    function statusChange(slction){
+
+    function statusChange(slction) {
         document.getElementById('save').value = slction.value;
-        if(document.getElementById('save').value == "ended"){
+        if (document.getElementById('save').value == "ended") {
             document.getElementById("price").style.display = "block"; // to show
             document.getElementById("pricelabel").style.display = "block"; // to show
         }
@@ -22,10 +22,10 @@
             c += 1;
         }
         else {
-            c-=1;
+            c -= 1;
         }
 
-        if (c>0){
+        if (c > 0) {
             {% if match_list[6] == "open" %}
             document.getElementById("unsubscribe").disabled = "";
             document.getElementById("uname").style.display = "none"; // to hide  
@@ -34,7 +34,7 @@
 
             {% elif match_list[6] == "ended" %}
             document.getElementById("mark").style.display = "block"; // to show
-            {% endif %}    
+            {% endif %}
         }
         else {
             {% if match_list[6] == "open" %}
@@ -44,22 +44,21 @@
             document.getElementById("sub").style.display = "block"; // to show
             {% elif match_list[6] == "ended" %}
             document.getElementById("mark").style.display = "none"; // to show
-            {% endif %}    
+            {% endif %}
         }
-    }    
+    }
 
     var form4 = document.getElementById("form4");
     form4.addEventListener("submit", submitForm, true);
 
-    function submitForm(event)
-    {
+    function submitForm(event) {
         event.preventDefault();
         alertify.confirm("This is a confirm dialog.",
-        function(){
-            document.getElementById("form4").submit();
-        },
-        function(){
-        });
+            function () {
+                document.getElementById("form4").submit();
+            },
+            function () {
+            });
     }       
 </script>
 
@@ -67,7 +66,7 @@
 <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
 
 <!-- CSS -->
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css"/>
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
 
 <div class="container">
     <div class="one">
@@ -93,35 +92,61 @@
                 </div>
             </div>
         </div>
+        <br>
         <form id="form" method="POST" action="">
-            <p>{{match_list[11]}}</p>
-            <p>Note: {{match_list[9]}}</p>
-            <p>Wachtwoord: {{match_list[8]}}</p>
-            <div class="input-group mb-3">
-                <label class="input-group-text" for="status">Status:</label>
+            <div>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text" id="basic-addon2" style="width:8rem;">Adres:</span>
+                    <input type="text" class="form-control" placeholder="Leesbaar voor iedereen"
+                        value="{{match_list[11]}}" disabled="disabled">
+                </div>
+            </div>
+            <div>
+                <div class="input-group input-group-sm mb-3">
+                    <span class="input-group-text" id="basic-addon2" style="width:8rem;">Wachtwoord:</span>
+                    <input type="text" class="form-control" placeholder="Leesbaar voor iedereen"
+                        value="{{match_list[8]}}" disabled="disabled">
+                </div>
+            </div>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" id="basic-addon2" style="width:8rem;">Notitie:</span>
+                <input type="text" class="form-control" name="note" placeholder="Leesbaar voor iedereen"
+                    value="{{match_list[9]}}" autocomplete="off">
+            </div>
+
+            <div class="input-group input-group-sm mb-3">
+                <label class="input-group-text" for="status" style="width:8rem;">Status:</label>
                 <select class="form-select" name="status" id="status" onchange="statusChange(this)">
-                    <option value="open" {% if match_list[6] == "open" %} selected="selected" {% endif %}>Open voor inschrijvingen</option>
-                    <option value="closed" {% if match_list[6] == "closed" %} selected="selected" {% endif %}>Gesloten voor inschrijvingen en betalingen</option>
-                    <option value="ended" {% if match_list[6] == "ended" %} selected="selected" {% endif %}>Afgelopen en open voor betalingen</option>
+                    <option value="open" {% if match_list[6]=="open" %} selected="selected" {% endif %}>Open voor
+                        inschrijvingen</option>
+                    <option value="closed" {% if match_list[6]=="closed" %} selected="selected" {% endif %}>Gesloten
+                        voor inschrijvingen en betalingen</option>
+                    <option value="ended" {% if match_list[6]=="ended" %} selected="selected" {% endif %}>Afgelopen en
+                        open voor betalingen</option>
                 </select>
             </div>
-            <div class="input-group mb-3">
-              <span class="input-group-text" id="pricelabel" {% if match_list[6] == "ended" %} style="display: block" {% else %}  style="display: none" {% endif %}>Prijs</span>
-              <input name="price" class="form-control" type="number" id="price" step="0.10" value="{{match_list[7]}}" {% if match_list[6] == "ended" %} style="display: block" {% else %}  style="display: none" {% endif %}>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" id="pricelabel" {% if match_list[6]=="ended" %} style="display: block" {%
+                    else %} style="display: none" {% endif %}>Prijs</span>
+                <input name="price" class="form-control" type="number" id="price" step="0.10" value="{{match_list[7]}}"
+                    {% if match_list[6]=="ended" %} style="display: block" {% else %} style="display: none" {% endif %}>
             </div>
-            
-            <button name="save" id="save" type="submit" class="btn btn-success" value="{{match_list[6]}}">Opslaan</button>
-            <button name="delete" id="delete" type="submit" class="btn btn-danger" form="form4" value="">Verwijder event</button>
+            <div class="split">
+                <button name="delete" id="delete" type="submit" class="btn btn-danger btn-sm" form="form4" value="">Verwijder
+                    event</button>
+                <button name="save" id="save" type="submit" class="btn btn-success btn-sm"
+                    value="{{match_list[6]}}">Opslaan</button>
+            </div>
         </form>
         <br>
         <br>
         <form id="form2" method="POST" action="">
-            <table class="table">
+            <table class="table" style="font-size:14px">
                 <thead>
                     <tr>
                         <th>Ingeschreven:</th>
                         {% if match_list[6] == "ended" %}
-                            <th>Betaald:</th>
+                        <th>Betaald:</th>
                         {% endif %}
                         <th></th>
                     </tr>
@@ -131,37 +156,42 @@
                     <tr>
                         <td> {{participants_data[i][0]}} </td>
                         {% if match_list[6] == "ended" %}
-                            <td> {% if participants_data[i][5] == 1 %} Yes! :) {% else %} Nope :( {% endif %} </td>
-                            {% if participants_data[i][5] == 0 %}
-                                <td><input type="checkbox" class="form-check-input" name="{{ participants_data[i][0] }}" onclick='handleClick(this)'></td>
-                            {% else %}
-                                <td></td>
-                            {% endif %}  
+                        <td> {% if participants_data[i][5] == 1 %} Yes! :) {% else %} Nope :( {% endif %} </td>
+                        {% if participants_data[i][5] == 0 %}
+                        <td><input type="checkbox" class="form-check-input" name="{{ participants_data[i][0] }}"
+                                onclick='handleClick(this)'></td>
                         {% else %}
-                            <td><input type="checkbox" class="form-check-input" name="{{ participants_data[i][0] }}" onclick='handleClick(this)'></td>
+                        <td></td>
+                        {% endif %}
+                        {% else %}
+                        <td><input type="checkbox" class="form-check-input" name="{{ participants_data[i][0] }}"
+                                onclick='handleClick(this)'></td>
                         {% endif %}
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
             {% if match_list[6] == "open" %}
-            <div class="input-group mb-3">
-                <datalist id="names" name= "names" method="POST" action="/">
+            <div class="input-group input-group-sm mb-3">
+                <datalist id="names" name="names" method="POST" action="/">
                     {% for name in names %}
-                        <option value= "{{name}}" SELECTED>{{name}}</option>"
+                    <option value="{{name}}" SELECTED>{{name}}</option>"
                     {% endfor %}
                     <option disabled selected value> -- select a name -- </option>
                 </datalist>
-                <input name="uname" id="uname" class="form-control" autoComplete="off" list="names" form="form3" placeholder="Voornaam + Achternaam">
+                <input name="uname" id="uname" class="form-control" autoComplete="off" list="names" form="form3"
+                    placeholder="Voornaam + Achternaam">
                 <button id="sub" class="btn btn-success" form="form3">Inschrijven</button>
             </div>
             <div class="input-group mb-3">
-            <button name="unsubscribe" id="unsubscribe" type="submit" value="" class="btn btn-danger" disabled="disabled" style="display: none">Uitschrijven</button>
+                <button name="unsubscribe" id="unsubscribe" type="submit" value="" class="btn btn-danger"
+                    disabled="disabled" style="display: none">Uitschrijven</button>
             </div>
             {% elif match_list[6] == "ended" %}
 
-                <input type="submit" id="mark" name="submit" value="Aanvinken als betaald" method="POST" action="/"  class="btn btn-success" style="display: none"> 
-            {% endif %}    
+            <input type="submit" id="mark" name="submit" value="Aanvinken als betaald" method="POST" action="/"
+                class="btn btn-success" style="display: none">
+            {% endif %}
         </form>
 
         <form id="form3" method="POST" action="">

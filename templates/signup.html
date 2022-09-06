@@ -21,11 +21,22 @@
                 </div>
             </div>
         </div>
-        <p>{{match_list[11]}}</p>
-        <br>
-        <p>{{match_list[9]}}</p>
         <div>
-            <table class="table" style="width:100%;">
+            <div class="input-group input-group-sm mb-2">
+                <span class="input-group-text" id="basic-addon2" style="width:8rem;">Adres:</span>
+                <input type="text" class="form-control" placeholder="Leesbaar voor iedereen"
+                    value="{{match_list[11]}}" disabled="disabled">
+            </div>
+        </div>
+        <div>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" id="basic-addon2" style="width:8rem;">Notitie:</span>
+                <input type="text" class="form-control" placeholder="-"
+                    value="{{match_list[9]}}" disabled="disabled">
+            </div>
+        </div>
+        <div>
+            <table class="table" style="width:100%;font-size:14px;">
                 <thead>
                     <tr>
                         <th></th>
