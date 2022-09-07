@@ -36,7 +36,7 @@
             </div>
         </div>
         <div>
-            <table class="table" style="width:100%;font-size:14px;">
+            <table class="table">
                 <thead>
                     <tr>
                         <th></th>
@@ -66,7 +66,7 @@
                   <input title="nieuw" class="form-check-input mt-0"  id="new" type="checkbox" name="newby">
                 </div>
                 <div class="input-group-text">
-                    <span id="basic-addon3" style="margin: 0 10px 0 0">Onder voorbehoud</span>
+                    <span id="basic-addon3" style="margin: 0 10px 0 0">Onder Voorbehoud</span>
                   <input class="form-check-input mt-0" id="tentative" type="checkbox" name="tentative">
                 </div>
             </div>
@@ -82,6 +82,14 @@
                 <button class="btn btn-success">Voeg toe</button>
             </div>
         </form>
+        
+        <table class="table" id="newpart">
+            <tbody id="newpart_body">
+            </tbody>
+        
+        </table>
+
+
 
         <p id="pNew"></p>
         <div>
@@ -115,7 +123,7 @@
     }
 
     Participant.prototype.toString = function participantToString() {
-        return `<br>${this.name} (new = ${this.newbie}, tentative = ${this.tentative}) `;
+        return `${this.name} (new = ${this.newbie}, tentative = ${this.tentative})`;
     };
 
     function addParticipant(event)
@@ -127,9 +135,21 @@
         var tentative = document.getElementById("tentative").checked;
         if (!newbie && !names.includes(name))
         {
-            alertify.error('Error message');
+            alertify.error('Naam bestaat nog niet, voeg het toe als een nieuwe persoon.');
             return;
         }
+
+        var beautify = "";
+        var newRow = document.createElement("tr");
+        newRow.innerHTML = (`<td></td>\
+                <td>${name}</td>\
+                <td>${newbie ? "Nieuw": ""}</td>\
+                <td>${tentative ? "Onder Voorbehoud" : ""}</td>`)
+        console.log(newRow.innerHTML);
+        document.getElementById("newpart").style = "width: 100%; font-size: 14px;";
+        document.getElementById("newpart").class = "table";
+        document.getElementById("newpart_body").appendChild(newRow);
+        
         newParticipants.push(new Participant(name, newbie, tentative));
         document.getElementById("uname").value = ""
         if (!newbie)
@@ -144,7 +164,9 @@
             }
         }
         console.log(newParticipants);
-        document.getElementById("pNew").innerHTML = newParticipants.toString();
+
+        console.log(beautify);
+        document.getElementById("pNew").innerHTML = newParticipants.join('<br>');
     }
 
     var form2 = document.getElementById("form2");

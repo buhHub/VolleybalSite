@@ -219,6 +219,10 @@ def adminmatch():
             conn.commit()
             return redirect(url_for('admin', message = f"{matchday} verwijderd en alle bijbehorende inschrijvingen."))
 
+        # FORM SUBMIT WHEN DELETE BUTTON PRESS
+        if "export" in request.form:
+            return redirect(url_for('export', matchday=matchday))
+
         # FORM SUBMIT WHEN SAVE BUTTON PRESS
         if "save" in request.form:
             status = c.execute(f"SELECT status FROM MATCHDAYS WHERE id='{matchday_id}'").fetchall()[0][0]
@@ -309,6 +313,7 @@ def adminmatch():
             return redirect(url_for('adminmatch', matchday = matchday, message = new_message))
 
     match_list, participants_data, names = Functions.match_webdeatils(matchday)
+    print(participants_data)
 
     return render_template('adminmatch.html', match_list = match_list, participants_data = participants_data, n_players = len(participants_data), message = message, names = names, n_names = len(names))
 
@@ -336,6 +341,17 @@ def admincreatematch():
         conn.commit()
         return redirect(url_for('admin', message = f"{date} is toegevoegd!"))
     return render_template('admincreatematch.html', list=list(location_list.values()), n_list=len(location_list))
+
+# EXPORT NAMELIST
+
+@app.route('/export', methods=['GET', 'POST'])
+@login_required
+def export():
+    matchday = request.args["matchday"]
+    data = [f"{i[0]}{', Nieuw' if i[2] else ''}{', Onder Voorbehoude' if i[3] else ''}" for i in Functions.getData().values() if i[1] == matchday]
+    data.sort()
+    print(data)
+    return render_template('export.html',data=data)
 
 # MATCHES
 
@@ -403,6 +419,7 @@ def signup():
     c = conn.cursor()
 
     if request.method == 'POST':
+        print(request.form)
         matchday_password = [value[-3] for key, value in Functions.getData("match").items() if value[0] == matchday][0]
 
         if matchday_password != request.form.get("password"):
