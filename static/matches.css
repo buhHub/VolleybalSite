@@ -2,6 +2,15 @@
     display: flex;
     justify-content: center;
 }
+.one{
+    max-width:50rem;
+    margin: 0 auto;
+}
+
+.split{
+    display: flex;
+    justify-content: space-between;
+}
 
 .card-open{
     background-color: rgb(23, 66, 0);

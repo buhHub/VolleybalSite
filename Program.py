@@ -357,21 +357,26 @@ def export():
 
 @app.route('/matches', methods=['GET', 'POST'])
 def matches():
+    message = request.args["message"] if "message" in request.args else ""
+    logged_in = current_user.is_authenticated
     if request.method == 'POST':
         matchday = int(request.form.get('dateBtn'))
-        open = [i for i in list(Functions.getData("match").values()) if i[0] == str(matchday)][0]
-        print(open)
-        if open[5] == "ended":
-            return redirect(url_for('payment', matchday = matchday, message = ''))
+        if logged_in:
+            return redirect(url_for('adminmatch', matchday = matchday, message = ''))
         else:
-            return redirect(url_for('signup', matchday = matchday, message = ''))
+            open = [i for i in list(Functions.getData("match").values()) if i[0] == str(matchday)][0]
+            print(open)
+            if open[5] == "ended":
+                return redirect(url_for('payment', matchday = matchday, message = ''))
+            else:
+                return redirect(url_for('signup', matchday = matchday, message = ''))
 
     match_list = list(Functions.getData("match").values())
     match_list.sort(key=lambda row: (row[0]))
 
     match_list = [ i + [datetime.datetime(int(i[0][:4]), int(i[0][4:6]), int(i[0][6:]), 0, 0).strftime("%A, %d %b %Y").title()] for i in match_list]
 
-    return render_template('matches.html', list=match_list[::-1], n_list=len(match_list))
+    return render_template('matches.html', list=match_list[::-1], n_list=len(match_list), message=message, logged_in = logged_in)
 
 # VOLLEYBALL: PAYMENT PAGE
 

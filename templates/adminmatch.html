@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<link rel="stylesheet" href="../static/adminmatch.css">
+<link rel="stylesheet" href="../static/matches.css">
 <script language="JavaScript">
 
     function statusChange(slction) {
@@ -48,8 +48,8 @@
             {% elif match_list[6] == "ended" %}
             document.getElementById("mark").style.display = "none"; // to show
 
-{% elif match_list[6] == "closed" %}
-document.getElementById("export").style.display = "none"; // to show
+            {% elif match_list[6] == "closed" %}
+            document.getElementById("export").style.display = "none"; // to show
             {% endif %}
         }
     }
@@ -168,8 +168,8 @@ document.getElementById("export").style.display = "none"; // to show
                         {% if match_list[6] == "ended" %}
                         <td> {% if participants_data[i][5] == 1 %} Yes! :) {% else %} Nope :( {% endif %} </td>
                         {% if participants_data[i][5] == 0 %}
-                            <td><input type="checkbox" class="form-check-input" name="{{ participants_data[i][0] }}"
-                                    onclick='handleClick(this)'></td>
+                        <td><input type="checkbox" class="form-check-input" name="{{ participants_data[i][0] }}"
+                                onclick='handleClick(this)'></td>
                         {% else %}
                         <td></td>
                         {% endif %}
@@ -207,7 +207,8 @@ document.getElementById("export").style.display = "none"; // to show
             {% elif match_list[6] == "closed" %}
 
             <input type="submit" id="export" name="export" value="Namenlijst exporteren" method="POST" action="/"
-                class="btn btn-sm btn-success" form="form5" {% if match_list[6] != "closed" %} style="display: none" {% endif %}>
+                class="btn btn-sm btn-success" form="form5" {% if match_list[6] !="closed" %} style="display: none" {%
+                endif %}>
             {% endif %}
         </form>
 

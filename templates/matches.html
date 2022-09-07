@@ -13,6 +13,20 @@
             4: Limiet
             5: Open voor inschrijven
          -->
+        {% if message != "" %}
+        <div class="alert alert-warning" role="alert">
+            {{message}}
+        </div>
+        {% endif %}
+        {% if logged_in %}
+        <div class="matches">
+            <div id="add" class="card-addevent" name="cardname" onclick="document.getElementById('form2').submit();">
+                <div class="participants">
+                    <h4>+ Nieuw event toevoegen +</h4>
+                </div>
+            </div>
+        </div>
+        {% endif %}
         {% for i in range(n_list) %}
         <form id="{{list[i][0]}}" method="POST" action="">
             <div class="matches">
