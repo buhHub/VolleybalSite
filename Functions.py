@@ -120,7 +120,7 @@ def match_webdeatils(matchday):
     conn = sqlite3.connect('Volleyball.db')
     c = conn.cursor()
     
-    match_list = [[key] + value for key, value in getData("match").items() if value[0] == matchday]
+    match_list = [[key] + value for key, value in getData("match").items() if value[0] == matchday][0]
     match_list.append(c.execute(f"SELECT details FROM LOCATIONS WHERE name='{match_list[4]}'").fetchall()[0][0])
     i=match_list[1]
     match_list.append(datetime.datetime(int(i[:4]), int(i[4:6]), int(i[6:]), 0, 0).strftime("%A, %d %b %Y").title())
