@@ -221,7 +221,7 @@ def create_app(testing: bool = True):
                 c.execute(f"DELETE FROM DATA WHERE match_id='{matchday_id}'")
                 conn.commit()
                 print(f"{matchday} has been deleted.")
-                return redirect(url_for('admin', message = f"{matchday} verwijderd en alle bijbehorende inschrijvingen."))
+                return redirect(url_for('matches', message = f"{matchday} verwijderd en alle bijbehorende inschrijvingen."))
 
             # FORM SUBMIT WHEN DELETE BUTTON PRESS
             if "export" in request.form:
@@ -376,6 +376,8 @@ def create_app(testing: bool = True):
         if request.method == 'POST':
             matchday = int(request.form.get('dateBtn'))
             if logged_in:
+                if "add" in request.form:
+                    return redirect(url_for('admincreatematch'))
                 return redirect(url_for('adminmatch', matchday = matchday, message = ''))
             else:
                 open = [i for i in list(Functions.getData("match").values()) if i[0] == str(matchday)][0]

@@ -18,7 +18,7 @@
             {{message}}
         </div>
         {% endif %}
-        {% if logged_in %}
+        {% if logged_in == True %}
         <div class="matches">
             <div id="add" class="card-addevent" name="cardname" onclick="document.getElementById('form2').submit();">
                 <div class="participants">
@@ -51,4 +51,6 @@
         {% endfor %}
     </div>
 </div>
+
+<form id="form2" action="/admincreatematch"></form>
 {% endblock %}
