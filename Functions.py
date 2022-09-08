@@ -62,7 +62,6 @@ def create_payment(matchday, names, price):
     )
 
     data = {"status": payment.status}
-    print(payment)
 
     conn = sqlite3.connect('Volleyball.db')
     c = conn.cursor()
@@ -72,7 +71,7 @@ def create_payment(matchday, names, price):
         player_id = c.execute(f"SELECT id FROM PLAYER WHERE firstname='{firstname}' AND lastname='{lastname}'").fetchall()[0][0]
         match_id = c.execute(f"SELECT id FROM MATCHDAYS WHERE date='{matchday}'").fetchall()[0][0]
 
-        print(player_id, match_id, payment.id)
+        print(f"Player_ID: {player_id} is going to pay for Match_ID {match_id} with P_ID {payment.id}.")
 
         #  ONLY DO THIS WHEN IT GENUINLY SAYS 0 AT PAID
         c.execute(f"UPDATE DATA SET payment_id='{payment.id}' WHERE player_id='{player_id}' AND match_id='{match_id}'")
@@ -119,12 +118,10 @@ def get_id(mode, search):
 def match_webdeatils(matchday):
     conn = sqlite3.connect('Volleyball.db')
     c = conn.cursor()
-    
     match_list = [[key] + value for key, value in getData("match").items() if value[0] == matchday][0]
     match_list.append(c.execute(f"SELECT details FROM LOCATIONS WHERE name='{match_list[4]}'").fetchall()[0][0])
     i=match_list[1]
     match_list.append(datetime.datetime(int(i[:4]), int(i[4:6]), int(i[6:]), 0, 0).strftime("%A, %d %b %Y").title())
-    print(match_list)
 
     participants_data = [i for i in list(getData().values()) if i[1]==matchday]
     participants_data.sort(key=lambda row: (row[0]))
