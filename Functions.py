@@ -62,7 +62,6 @@ def create_payment(matchday, names, price):
     )
 
     data = {"status": payment.status}
-    print(f"{' - '.join(names)} is going to pay for Match_ID {matchday} with P_ID {payment.id}.")
 
     conn = sqlite3.connect('Volleyball.db')
     c = conn.cursor()
@@ -71,6 +70,7 @@ def create_payment(matchday, names, price):
         firstname, lastname = name.split(' ')[0], ' '.join(name.split(' ')[1:])
         player_id = c.execute(f"SELECT id FROM PLAYER WHERE firstname='{firstname}' AND lastname='{lastname}'").fetchall()[0][0]
         match_id = c.execute(f"SELECT id FROM MATCHDAYS WHERE date='{matchday}'").fetchall()[0][0]
+        print(f"{name} - {player_id} is going to pay for Match_ID {matchday} - {match_id} with P_ID {payment.id}.")
 
         #  ONLY DO THIS WHEN IT GENUINLY SAYS 0 AT PAID
         c.execute(f"UPDATE DATA SET payment_id='{payment.id}' WHERE player_id='{player_id}' AND match_id='{match_id}'")
