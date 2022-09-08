@@ -71,7 +71,7 @@ def create_app(testing: bool = True):
     @app.route('/webhook', methods=['GET', 'POST'])
     def webhook():
         if "id" not in request.form:
-                abort(404, "Unknown payment id")
+            abort(404, "Unknown payment id")
 
         payment_id = request.form["id"]
         
@@ -83,13 +83,15 @@ def create_app(testing: bool = True):
         # for key, value in payment.items():
         #     print(f"{key}: ",value)
 
+        print(f"Webhook: \n\t{payment.id} has a new status: {payment.status}.")
+
         if payment.status == 'paid':
             conn = sqlite3.connect('Volleyball.db')
             c = conn.cursor()
-            print(f"Webhook: {payment.id} has paid.")
 
             c.execute(f"UPDATE DATA SET paid=1 WHERE payment_id='{payment.id}'")
             conn.commit()
+            print(f"Webhook: \n\t{payment.id} marked as paid in db")
 
 
         return 'succes', 200
@@ -116,6 +118,7 @@ def create_app(testing: bool = True):
             
             c.executemany("INSERT INTO LOCATIONS (name, details, max) VALUES (?, ?, ?)", [(title, details, max)])
             conn.commit()
+            print(f"{current_user.id} added {title} as a new location.")
             return redirect(url_for('admincreatematch'))
         return render_template('addlocation.html')
 
@@ -148,9 +151,8 @@ def create_app(testing: bool = True):
             data = [uname, (pw1), user_id]
             c.execute(f"INSERT INTO LOGIN (username, hash, activated) VALUES (?,?,?)", data)
             conn.commit()
+            print(f"{uname} has been added as admin by {current_user.id}.")
             return redirect(url_for("admin", message = f"{uname} succesvol toegevoegd door {current_user.id}."))
-
-            
 
         message = ""
         uname = ""
@@ -213,16 +215,17 @@ def create_app(testing: bool = True):
 
         if request.method == 'POST':
             message = ""
-            print(request.form)
             # FORM SUBMIT WHEN DELETE BUTTON PRESS
             if "delete" in request.form:
                 c.execute(f"DELETE FROM MATCHDAYS WHERE date='{matchday}'")
                 c.execute(f"DELETE FROM DATA WHERE match_id='{matchday_id}'")
                 conn.commit()
+                print(f"{matchday} has been deleted.")
                 return redirect(url_for('admin', message = f"{matchday} verwijderd en alle bijbehorende inschrijvingen."))
 
             # FORM SUBMIT WHEN DELETE BUTTON PRESS
             if "export" in request.form:
+                print(f"{matchday} has been exported.")
                 return redirect(url_for('export', matchday=matchday))
 
             # FORM SUBMIT WHEN SAVE BUTTON PRESS
@@ -239,10 +242,11 @@ def create_app(testing: bool = True):
                 c.execute(f"UPDATE MATCHDAYS SET price='{price}' WHERE id='{matchday_id}'") 
                 c.execute(f"UPDATE MATCHDAYS SET note='{note}' WHERE id='{matchday_id}'") 
                 conn.commit()
+                print(f"{matchday} has been set to {new_status if new_status != None else status}, with price: {price} and note: {note}.")
 
                 if status != new_status and new_status != None:
                     c.execute(f"UPDATE MATCHDAYS SET status='{new_status}' WHERE id='{matchday_id}'")
-                    conn.commit()
+                    conn.commit()                    
                 return redirect(url_for('adminmatch', matchday = matchday, message = "Status en prijs geupdate"))
 
             # FORM SUBMIT WHEN SUBMIT BUTTON PRESS
@@ -260,6 +264,9 @@ def create_app(testing: bool = True):
                     conn.commit()
 
                     new_message = f"Volgende spelers zijn verwijderd van de lijst: \n {' - '.join(unsubscribers)}"
+
+                    terminal_message = '\n' + '\n'.join(unsubscribers)
+                    print(f"Following players have been removed from {matchday} by {current_user.id}: {terminal_message}")
                     return redirect(url_for('adminmatch', matchday = matchday, message = new_message))
                 if "uname" in request.form:
                     if request.form.get("uname") != "":
@@ -272,12 +279,16 @@ def create_app(testing: bool = True):
                             c.execute("INSERT INTO PLAYER (firstname, lastname) VALUES (?, ?)", (signup_firstname, signup_lastname))
                             conn.commit()
                             newbie = 1
+                            print(f"{signupname} has been added to the db by {current_user.id}")
                             pass
                         elif status == "full":
+                            print(f"{signupname} has been signed up to {matchday} by {current_user.id}, but it is full.")
                             return redirect(url_for('adminmatch', matchday = matchday, message = "Limiet bereikt."))
                         elif status == "duplicate":
+                            print(f"{signupname} has been signed up to {matchday} by {current_user.id}, but {signupname} is already signed up.")
                             return redirect(url_for('adminmatch', matchday = matchday, message = f"{signupname} staat al ingeschreven."))
                         elif status == "not_paid":
+                            print(f"{signupname} has been signed up to {matchday} by {current_user.id}, but did not fulfill all previous events.")
                             return redirect(url_for('adminmatch', matchday = matchday, message = f"Vorige betalingen van {signupname} zijn nog niet voldaan."))
                         elif status == "allowed":
                             pass
@@ -286,6 +297,7 @@ def create_app(testing: bool = True):
                         data = [(player_id, matchday_id,newbie,0, 'NULL', 0)]
                         c.executemany("INSERT INTO DATA (player_id, match_id, new_player, tentative, payment_id, paid) VALUES (?, ?, ?, ?, ?, ?)", data)
                         conn.commit()
+                        print(f"{signupname} has succesfully signed up to {matchday} by {current_user.id}.")
                         message = f"{signupname} is toegevoegd!"
 
             elif status == "ended": 
@@ -299,8 +311,12 @@ def create_app(testing: bool = True):
                 dt = datetime.datetime.now().strftime("%Y%m%d %H%M%S")
                 db_message = f"Manually modified on {ip} at {dt}"
 
+                terminal_message = '\n'.join([f'{payers[i]} + {payers_ids[i]}' for i in range(len(payers))])
+                print(f"{current_user.id} wants to mark [{terminal_message}] on {matchday} as paid.")
+
                 for n in payers_ids:
                     if c.execute(f"SELECT paid FROM DATA WHERE player_id='{n}' AND match_id='{matchday_id}'").fetchall()[0][0] == 0:
+                        print(f"{n} has succesfully marked {matchday} as paid by {current_user.id}.")
                         c.execute(f"UPDATE DATA SET payment_id='{db_message}', paid=1 WHERE player_id='{n}' and match_id='{matchday_id}'")
 
                 conn.commit()
@@ -337,6 +353,7 @@ def create_app(testing: bool = True):
             
             c.executemany("INSERT INTO MATCHDAYS (date, starttime, endtime, location, max, status, price, password, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [(date, starttime, endtime, location, capacity, status, price, password, note)])
             conn.commit()
+            print(f"A new event has been added: {date}.")
             return redirect(url_for('admin', message = f"{date} is toegevoegd!"))
         return render_template('admincreatematch.html', list=list(location_list.values()), n_list=len(location_list))
 
@@ -398,6 +415,7 @@ def create_app(testing: bool = True):
             total_price = n_payments * price
 
             checkout_url = Functions.create_payment(matchday, going2pay, "{:.2f}".format(total_price))
+            
             return redirect(checkout_url)
                     
         match_list, participants_data, names = Functions.match_webdeatils(matchday)
@@ -416,12 +434,12 @@ def create_app(testing: bool = True):
         c = conn.cursor()
 
         if request.method == 'POST':
-            print(request.form)
             matchday_password = [value[-3] for key, value in Functions.getData("match").items() if value[0] == matchday][0]
 
             if matchday_password != request.form.get("password"):
                 match_list, participants_data, names = Functions.match_webdeatils(matchday)
                 new_message = ["Wachtwoord komt niet overeen."]
+                print(f"Someone tried to sign up for {matchday}, but got the password wrong. \n\tPW: {matchday_password}, Actual: {request.form.get('password')}.")
                 return render_template('signup.html', match_list = match_list, participants_data = participants_data, n_players = len(participants_data), message = new_message, names = names, n_names = len(names))
             
             message = []
@@ -447,19 +465,25 @@ def create_app(testing: bool = True):
                         data = [(player_id, matchday_id,newbie,tentative, 'NULL', 0)]
                         c.executemany("INSERT INTO DATA (player_id, match_id, new_player, tentative, payment_id, paid) VALUES (?, ?, ?, ?, ?, ?)", data)
                         conn.commit()
+
+                        print(f"{signupname} added to db and signed up for {matchday}.")
                     else:
+                        print(f"{signupname} is an unknown person, and did not flag [New].")
                         message.append(f"{signupname} niet toegevoegd, geef aan dat {signupname} nieuw is. ")
                 
                 # MATCH LIMIT REACHED
                 elif status == "full":
+                    print(f"{signupname} tried to sign up for {matchday}, but its full.")
                     message.append(f"{signupname} niet toegevoegd, limiet bereikt. ")
 
                 # PERSON ALREADY SIGNED UP
                 elif status == "duplicate":
+                    print(f"{signupname} tried to sign up for {matchday}, but {signupname} is already signed up.")
                     message.append(f"{signupname} is al toegevoegd. ")
 
                 # PERSON DID NOT PAY
                 elif status == "not_paid":
+                    print(f"{signupname} tried to sign up for {matchday}, but did not pay for previous events.")
                     message.append(f"{signupname} heeft nog niet betaald. ")
 
                 #SUCCESS
@@ -472,6 +496,7 @@ def create_app(testing: bool = True):
                     data = [(player_id, matchday_id,0,tentative, 'NULL', 0)]
                     c.executemany("INSERT INTO DATA (player_id, match_id, new_player, tentative, payment_id, paid) VALUES (?, ?, ?, ?, ?, ?)", data)
                     conn.commit()
+                    print(f"{signupname} signed up {matchday}.")
 
         match_list, participants_data, names = Functions.match_webdeatils(matchday)
 
