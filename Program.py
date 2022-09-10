@@ -170,6 +170,7 @@ def create_app(testing: bool = True):
                 user = User()
                 user.id = uname
                 login_user(user)
+                print(f"{current_user.id} logged in.")
                 return redirect(url_for('admin'))
         return render_template('adminlogin.html', uname = uname)
         
