@@ -64,7 +64,7 @@
                 document.getElementById("form4").submit();
             },
             function () {
-            });
+            }).set('reverseButtons', true);
     }       
 </script>
 
@@ -139,7 +139,7 @@
                     {% if match_list[6]=="ended" %} style="display: block" {% else %} style="display: none" {% endif %}>
             </div>
             <div class="split">
-                <button name="delete" id="delete" type="submit" class="btn btn-danger btn-sm" form="form4"
+                <button name="delete" id="delete" class="btn btn-danger btn-sm" form="form4"
                     value="">Verwijder
                     event</button>
                 <button name="save" id="save" type="submit" class="btn btn-success btn-sm"

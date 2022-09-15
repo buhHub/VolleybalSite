@@ -348,6 +348,10 @@ def create_app(testing: bool = True):
             status = "open" if request.form.get('open') == 'on' else "closed"
             price = "0.00"
             note = request.form.get('note')
+
+            if date in [i[0] for i in Functions.getData("match").values()]:
+                print(f"On {date}, an event is already taking place. Cant add another one.")
+                return redirect(url_for('admin', message = f"{date} is al bezet door een ander event!"))
             
             conn = sqlite3.connect('Volleyball.db')
             c = conn.cursor()
